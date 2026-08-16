@@ -35,7 +35,7 @@ test("rejects invalid modes and unsafe viewport values", () => {
 });
 
 test("maps simulation results and creates stable artifact names", () => {
-  const result = { originalHtml: "original", clientLightHtml: "light", clientDarkHtml: "dark" };
+  const result = { originalPreviewHtml: "original", clientLightHtml: "light", clientDarkHtml: "dark" };
   assert.equal(htmlForMode(result, "original"), "original");
   assert.equal(htmlForMode(result, "light"), "light");
   assert.equal(htmlForMode(result, "dark"), "dark");

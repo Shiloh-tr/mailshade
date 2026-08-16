@@ -30,6 +30,9 @@
     "dotenv": "^17.2.1",
     "linkedom": "^0.18.13",
     "nodemailer": "^9.0.5",
+    "postcss": "^8.5.26",
+    "postcss-selector-parser": "^7.1.5",
+    "postcss-value-parser": "^4.2.0",
     "puppeteer-core": "^25.7.0",
     "react": "19.2.6",
     "react-dom": "19.2.6"

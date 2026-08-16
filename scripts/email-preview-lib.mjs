@@ -62,7 +62,7 @@ export function selectModes(mode) {
 }
 
 export function htmlForMode(result, mode) {
-  if (mode === "original") return result.originalHtml;
+  if (mode === "original") return result.originalPreviewHtml ?? result.originalHtml;
   if (mode === "light") return result.clientLightHtml;
   if (mode === "dark") return result.clientDarkHtml;
   throw new Error(`Unknown mode '${mode}'.`);

@@ -10,6 +10,10 @@ const stats = () => ({
   preservedDarkColors: 0,
   gradients: 0,
   remoteImages: 0,
+  unresolvedCss: 0,
+  securityRemovedElements: 0,
+  securityRemovedAttributes: 0,
+  securityRemovedDeclarations: 0,
 });
 
 test("preserves alpha while transforming rgba foreground colors", () => {
@@ -64,7 +68,8 @@ test("removes unsafe CSS URL schemes", () => {
     const value = stats();
     const result = __testing.processDeclarations(`background-image:url(${scheme}:payload);color:#000`, value, false);
     assert.equal(result, "color:#000");
-    assert.equal(value.strippedDeclarations, 1);
+    assert.equal(value.strippedDeclarations, 0);
+    assert.equal(value.securityRemovedDeclarations, 1);
   }
 });
 
@@ -77,9 +82,12 @@ test("keeps https and cid CSS image URLs available to email fixtures", () => {
   }
 });
 
-test("ignores malformed declarations without corrupting valid neighbors", () => {
-  const result = __testing.processDeclarations("broken;color:#000;also-broken;background:#fff", stats(), true);
-  assert.equal(result, "color:#ffffff;background:#212025");
+test("preserves malformed declaration blocks instead of guessing", () => {
+  const value = stats();
+  const input = "broken;color:#000;also-broken;background:#fff";
+  const result = __testing.processDeclarations(input, value, true);
+  assert.equal(result, input);
+  assert.equal(value.unresolvedCss, 1);
 });
 
 test("strips custom properties and dependent declarations for Gmail", () => {

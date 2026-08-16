@@ -12,6 +12,10 @@ const stats = () => ({
   preservedDarkColors: 0,
   gradients: 0,
   remoteImages: 0,
+  unresolvedCss: 0,
+  securityRemovedElements: 0,
+  securityRemovedAttributes: 0,
+  securityRemovedDeclarations: 0,
 });
 
 test("calibration CLI and runtime use identical contextual residual interpolation", () => {

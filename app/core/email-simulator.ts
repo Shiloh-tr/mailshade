@@ -1,4 +1,7 @@
-import { DEFAULT_CLIENT_ID, getClientAdapter, type ClientAdapter, type ColorAnchor, type ColorTransformProfile, type ProfileStatus } from "./clients/index.ts";
+import postcss from "postcss";
+import selectorParser from "postcss-selector-parser";
+import valueParser from "postcss-value-parser";
+import { DEFAULT_CLIENT_ID, getClientAdapter, type ClientAdapter, type ColorAnchor, type ColorTransformProfile, type EffectiveRule, type ProfileStatus, type RuleApplication } from "./clients/index.ts";
 
 export type DiagnosticLevel = "info" | "warning";
 
@@ -15,6 +18,9 @@ export interface SimulationOptions {
 }
 
 export interface SimulationResult {
+  sourceHtml: string;
+  originalPreviewHtml: string;
+  /** Compatibility alias for callers created before originalPreviewHtml was named explicitly. */
   originalHtml: string;
   clientLightHtml: string;
   clientDarkHtml: string;
@@ -27,6 +33,16 @@ export interface SimulationResult {
     preservedDarkColors: number;
     gradients: number;
     remoteImages: number;
+    unresolvedCss: number;
+    securityRemovedElements: number;
+    securityRemovedAttributes: number;
+    securityRemovedDeclarations: number;
+  };
+  ruleApplications: RuleApplication[];
+  compatibility: {
+    profileId: string;
+    catalogCommit: string;
+    target: ClientAdapter["compatibility"]["target"];
   };
   profile: {
     id: string;
@@ -37,21 +53,17 @@ export interface SimulationResult {
     id: string;
     label: string;
     platform: string;
+    target: ClientAdapter["compatibility"]["target"];
   };
 }
 
-const FORBIDDEN_ELEMENTS = [
+const SECURITY_REMOVED_ELEMENTS = [
   "script",
   "iframe",
   "frame",
   "frameset",
   "object",
   "embed",
-  "form",
-  "input",
-  "textarea",
-  "select",
-  "button",
   "base",
   "video",
   "audio",
@@ -85,7 +97,7 @@ interface RGB {
   a: number;
 }
 
-type MutableStats = SimulationResult["stats"];
+type MutableStats = SimulationResult["stats"] & { ruleCounts?: Record<string, number> };
 
 type ColorRole = "surface" | "text" | "border";
 
@@ -296,105 +308,174 @@ function transformColorTokens(
   });
 }
 
-function splitDeclarations(block: string) {
-  const parts: string[] = [];
-  let current = "";
-  let depth = 0;
-  let quote = "";
-  for (const char of block) {
-    if (quote) {
-      current += char;
-      if (char === quote) quote = "";
-      continue;
-    }
-    if (char === '"' || char === "'") quote = char;
-    if (char === "(") depth += 1;
-    if (char === ")") depth = Math.max(0, depth - 1);
-    if (char === ";" && depth === 0) {
-      parts.push(current);
-      current = "";
-    } else current += char;
-  }
-  if (current.trim()) parts.push(current);
-  return parts;
+function recordRule(stats: MutableStats, rule: EffectiveRule | undefined, count = 1) {
+  if (!rule) return;
+  stats.ruleCounts ??= {};
+  stats.ruleCounts[rule.id] = (stats.ruleCounts[rule.id] ?? 0) + count;
 }
 
-function processDeclarations(block: string, stats: MutableStats, dark: boolean, adapter: ClientAdapter = getClientAdapter(DEFAULT_CLIENT_ID)) {
-  const output: string[] = [];
-  const declarations = splitDeclarations(block);
-  const contextText = declarations.flatMap((declaration) => {
-    const colon = declaration.indexOf(":");
-    if (colon < 1 || declaration.slice(0, colon).trim().toLowerCase() !== "color") return [];
-    const token = declaration.slice(colon + 1).match(COLOR_TOKEN)?.[0];
+function matchingRule(adapter: ClientAdapter, predicate: (rule: EffectiveRule) => boolean) {
+  return adapter.compatibility.rules.find(predicate);
+}
+
+function valueFunctions(value: string) {
+  const functions: string[] = [];
+  valueParser(value).walk((node) => {
+    if (node.type === "function") functions.push(node.value.toLowerCase());
+  });
+  return functions;
+}
+
+function valueUrlSchemes(value: string) {
+  const schemes: string[] = [];
+  valueParser(value).walk((node) => {
+    if (node.type !== "function" || node.value.toLowerCase() !== "url") return;
+    const raw = valueParser.stringify(node.nodes).trim().replace(/^(['"])(.*)\1$/, "$2");
+    const scheme = raw.match(/^([a-z][a-z0-9+.-]*):/i)?.[1]?.toLowerCase();
+    if (scheme) schemes.push(scheme);
+  });
+  return schemes;
+}
+
+function declarationRule(property: string, value: string, adapter: ClientAdapter) {
+  const functions = valueFunctions(value);
+  const schemes = valueUrlSchemes(value);
+  return matchingRule(adapter, (rule) => {
+    if (rule.action !== "drop-declaration") return false;
+    if (rule.matcher?.property && property === rule.matcher.property) return true;
+    if (rule.matcher?.propertyPrefix && property.startsWith(rule.matcher.propertyPrefix)) return true;
+    if (rule.matcher?.function && functions.includes(rule.matcher.function)) return true;
+    return Boolean(rule.matcher?.urlScheme && schemes.includes(rule.matcher.urlScheme));
+  });
+}
+
+function processDeclarationContainer(container: postcss.Container, stats: MutableStats, dark: boolean, adapter: ClientAdapter) {
+  const contextText = container.nodes?.flatMap((node) => {
+    if (node.type !== "decl" || node.prop.toLowerCase() !== "color") return [];
+    const token = node.value.match(COLOR_TOKEN)?.[0];
     const parsed = token ? parseColor(token) : null;
     return parsed ? [parsed] : [];
   })[0];
-  for (const declaration of declarations) {
-    const colon = declaration.indexOf(":");
-    if (colon < 1) continue;
-    const property = declaration.slice(0, colon).trim().toLowerCase();
-    let value = declaration.slice(colon + 1).trim();
-    if (!adapter.supportsCustomProperties && (property.startsWith("--") || /\bvar\s*\(/i.test(value))) {
-      stats.strippedDeclarations += 1;
-      continue;
+  const allowedProperties = new Set(adapter.compatibility.allowedCssProperties);
+
+  container.each((node) => {
+    if (node.type !== "decl") return;
+    const property = node.prop.trim().toLowerCase();
+    if (valueUrlSchemes(node.value).some((scheme) => ["javascript", "vbscript", "file"].includes(scheme))) {
+      stats.securityRemovedDeclarations += 1;
+      node.remove();
+      return;
     }
-    if (!adapter.supportedProperties.has(property) && !property.startsWith("--")) {
+    const rule = declarationRule(property, node.value, adapter);
+    if (rule) {
       stats.strippedDeclarations += 1;
-      continue;
+      recordRule(stats, rule);
+      node.remove();
+      return;
     }
-    if (/url\(\s*(['"]?)\s*(?:javascript|vbscript|file):/i.test(value)) {
+    if (!allowedProperties.has(property)) {
       stats.strippedDeclarations += 1;
-      continue;
+      node.remove();
+      return;
     }
-    if (!adapter.supportsCssDataUrls && /url\(\s*(['"]?)\s*data:/i.test(value)) {
-      stats.strippedDeclarations += 1;
-      continue;
-    }
-    if (dark) {
-      if (property === "color") value = transformColorTokens(value, "text", stats, undefined, adapter.profile);
-      else if (property.includes("border") || property === "outline") value = transformColorTokens(value, "border", stats, undefined, adapter.profile);
-      else if (["background", "background-color", "background-image", "box-shadow", "fill", "stroke"].includes(property)) {
-        if (adapter.preserveGradients && /gradient\(/i.test(value)) {
-          stats.gradients += 1;
-        } else {
-          value = transformColorTokens(value, "surface", stats, contextText, adapter.profile);
-        }
+    const preservedRule = matchingRule(adapter, (candidate) => {
+      if (candidate.action !== "preserve") return false;
+      if (candidate.matcher?.property === property) return true;
+      if (candidate.matcher?.function && valueFunctions(node.value).includes(candidate.matcher.function)) return true;
+      if (candidate.matcher?.keyword && node.value.toLowerCase().includes(candidate.matcher.keyword)) return true;
+      return Boolean(candidate.matcher?.declarationImportant && node.important);
+    });
+    recordRule(stats, preservedRule);
+    if (!dark) return;
+
+    const transformedBefore = stats.transformedColors;
+    if (property === "color") node.value = transformColorTokens(node.value, "text", stats, undefined, adapter.profile);
+    else if (property.includes("border") || property === "outline") node.value = transformColorTokens(node.value, "border", stats, undefined, adapter.profile);
+    else if (["background", "background-color", "background-image", "box-shadow", "fill", "stroke"].includes(property)) {
+      if (adapter.preserveGradients && valueFunctions(node.value).some((name) => name.endsWith("gradient"))) {
+        stats.gradients += 1;
+        recordRule(stats, matchingRule(adapter, (candidate) => candidate.matcher?.functionSuffix === "gradient"));
+      } else {
+        node.value = transformColorTokens(node.value, "surface", stats, contextText, adapter.profile);
       }
     }
-    output.push(`${property}:${value}`);
-  }
-  return output.join(";");
+    if (stats.transformedColors > transformedBefore) {
+      recordRule(stats, matchingRule(adapter, (candidate) => candidate.domain === "color" && candidate.action === "transform-color"), stats.transformedColors - transformedBefore);
+    }
+  });
 }
 
-function selectorSupported(selector: string) {
-  return !selector.includes("[") && !selector.includes("]") && !/:(?!first-child|last-child|hover|active|visited|link)/i.test(selector);
+function processDeclarations(block: string, stats: MutableStats, dark: boolean, adapter: ClientAdapter = getClientAdapter(DEFAULT_CLIENT_ID)) {
+  try {
+    const root = postcss.parse(`a{${block}}`);
+    const rule = root.first;
+    if (!rule || rule.type !== "rule") return block;
+    processDeclarationContainer(rule, stats, dark, adapter);
+    return (rule.nodes ?? []).map((node) => node.toString()).join(";");
+  } catch {
+    stats.unresolvedCss += 1;
+    return block;
+  }
+}
+
+const ALLOWED_PSEUDOS = new Set([":first-child", ":last-child", ":hover", ":active", ":visited", ":link"]);
+
+function selectorSupported(selector: string, stats?: MutableStats, adapter: ClientAdapter = getClientAdapter(DEFAULT_CLIENT_ID)) {
+  try {
+    let supported = true;
+    let unsupportedAttribute = false;
+    const attributeRule = matchingRule(adapter, (rule) => rule.domain === "css-selector" && Boolean(rule.matcher?.allowedAttribute));
+    selectorParser((root) => {
+      root.walkAttributes((attribute) => {
+        if (attribute.attribute !== attributeRule?.matcher?.allowedAttribute || attribute.operator !== attributeRule.matcher.allowedOperator) {
+          supported = false;
+          unsupportedAttribute = true;
+        }
+      });
+      root.walkPseudos((pseudo) => {
+        if (!ALLOWED_PSEUDOS.has(pseudo.value.toLowerCase())) supported = false;
+      });
+    }).processSync(selector);
+    if (unsupportedAttribute && stats) recordRule(stats, attributeRule);
+    return supported;
+  } catch {
+    if (stats) stats.unresolvedCss += 1;
+    return false;
+  }
+}
+
+function mediaRuleSupported(parameters: string, stats: MutableStats, adapter: ClientAdapter) {
+  const measuredDrop = matchingRule(adapter, (rule) => rule.domain === "css-at-rule" && Boolean(rule.matcher?.mediaFeature) && parameters.toLowerCase().includes(rule.matcher!.mediaFeature!));
+  if (measuredDrop) {
+    recordRule(stats, measuredDrop);
+    return false;
+  }
+  if (!/^(?:screen|all)(?:\s+and\s+|$)/i.test(parameters.trim())) return false;
+  const features = [...parameters.matchAll(/\(\s*([a-z-]+)/gi)].map((match) => match[1].toLowerCase());
+  return features.every((feature) => feature === "min-width" || feature === "max-width");
 }
 
 function processStyleSheet(css: string, stats: MutableStats, dark: boolean, adapter: ClientAdapter = getClientAdapter(DEFAULT_CLIENT_ID)): string {
-  let index = 0;
-  let output = "";
-  while (index < css.length) {
-    const open = css.indexOf("{", index);
-    if (open < 0) break;
-    const header = css.slice(index, open).trim();
-    let depth = 1;
-    let cursor = open + 1;
-    while (cursor < css.length && depth > 0) {
-      if (css[cursor] === "{") depth += 1;
-      else if (css[cursor] === "}") depth -= 1;
-      cursor += 1;
-    }
-    const body = css.slice(open + 1, cursor - 1);
-    if (/^@media\s+(?:screen|all)/i.test(header)) {
-      output += `${header}{${processStyleSheet(body, stats, dark, adapter)}}`;
-    } else if (!header.startsWith("@") && selectorSupported(header)) {
-      output += `${header}{${processDeclarations(body, stats, dark, adapter)}}`;
-    } else {
-      stats.strippedDeclarations += splitDeclarations(body).length || 1;
-    }
-    index = cursor;
+  try {
+    const root = postcss.parse(css);
+    root.walkAtRules((atRule) => {
+      if (atRule.name.toLowerCase() === "media" && mediaRuleSupported(atRule.params, stats, adapter)) return;
+      stats.strippedDeclarations += atRule.nodes?.length || 1;
+      atRule.remove();
+    });
+    root.walkRules((rule) => {
+      if (!selectorSupported(rule.selector, stats, adapter)) {
+        stats.strippedDeclarations += rule.nodes?.length || 1;
+        rule.remove();
+        return;
+      }
+      processDeclarationContainer(rule, stats, dark, adapter);
+    });
+    return root.toString();
+  } catch {
+    stats.unresolvedCss += 1;
+    return css;
   }
-  return output;
 }
 
 function safeUrl(value: string) {
@@ -428,9 +509,9 @@ function processDocument(input: string, options: SimulationOptions, stats: Mutab
   const document = parser.parseFromString(input, "text/html");
   if (!document.body) document.documentElement.append(document.createElement("body"));
 
-  for (const selector of FORBIDDEN_ELEMENTS) {
+  for (const selector of SECURITY_REMOVED_ELEMENTS) {
     const nodes = [...document.querySelectorAll(selector)];
-    stats.strippedElements += nodes.length;
+    stats.securityRemovedElements += nodes.length;
     nodes.forEach((node) => node.remove());
   }
 
@@ -439,7 +520,7 @@ function processDocument(input: string, options: SimulationOptions, stats: Mutab
       const name = attribute.name.toLowerCase();
       if (name.startsWith("on") || (["href", "src", "background", "action"].includes(name) && !safeUrl(attribute.value))) {
         element.removeAttribute(attribute.name);
-        stats.strippedAttributes += 1;
+        stats.securityRemovedAttributes += 1;
       }
     }
     const image = element instanceof HTMLImageElement ? element : null;
@@ -465,6 +546,12 @@ function processDocument(input: string, options: SimulationOptions, stats: Mutab
   }
 
   if (adapter) {
+    const bodyStyleRule = matchingRule(adapter, (rule) => rule.domain === "html-element" && rule.matcher?.element === "style" && rule.matcher.location === "body");
+    for (const style of [...document.body.querySelectorAll("style")]) {
+      stats.strippedElements += 1;
+      recordRule(stats, bodyStyleRule);
+      style.remove();
+    }
     for (const style of [...document.querySelectorAll("style")]) {
       style.textContent = processStyleSheet(style.textContent ?? "", stats, dark, adapter);
     }
@@ -484,11 +571,16 @@ export function simulateEmail(input: string, options: SimulationOptions): Simula
     preservedDarkColors: 0,
     gradients: 0,
     remoteImages: 0,
+    unresolvedCss: 0,
+    securityRemovedElements: 0,
+    securityRemovedAttributes: 0,
+    securityRemovedDeclarations: 0,
+    ruleCounts: {},
   });
   const originalStats = createStats();
   const lightStats = createStats();
   const darkStats = createStats();
-  const originalHtml = processDocument(input, options, originalStats, null, false);
+  const originalPreviewHtml = processDocument(input, options, originalStats, null, false);
   const clientLightHtml = processDocument(input, options, lightStats, adapter, false);
   const clientDarkHtml = processDocument(input, options, darkStats, adapter, true);
   const stats: MutableStats = {
@@ -499,12 +591,26 @@ export function simulateEmail(input: string, options: SimulationOptions): Simula
     preservedDarkColors: darkStats.preservedDarkColors,
     gradients: darkStats.gradients,
     remoteImages: Math.max(originalStats.remoteImages, lightStats.remoteImages, darkStats.remoteImages),
+    unresolvedCss: Math.max(lightStats.unresolvedCss, darkStats.unresolvedCss),
+    securityRemovedElements: originalStats.securityRemovedElements,
+    securityRemovedAttributes: originalStats.securityRemovedAttributes,
+    securityRemovedDeclarations: Math.max(originalStats.securityRemovedDeclarations, lightStats.securityRemovedDeclarations, darkStats.securityRemovedDeclarations),
   };
+  const ruleCounts = new Map<string, number>();
+  for (const current of [lightStats, darkStats]) {
+    for (const [ruleId, count] of Object.entries(current.ruleCounts ?? {})) {
+      ruleCounts.set(ruleId, Math.max(ruleCounts.get(ruleId) ?? 0, count));
+    }
+  }
+  const ruleApplications: RuleApplication[] = adapter.compatibility.rules.flatMap((rule) => {
+    const count = ruleCounts.get(rule.id) ?? 0;
+    return count ? [{ ruleId: rule.id, featureId: rule.featureId, action: rule.action, count, evidence: rule.evidence, confidence: rule.confidence }] : [];
+  });
   const diagnostics: Diagnostic[] = [
     {
       level: "info",
       title: `${adapter.label} compatibility pass`,
-      detail: `${stats.strippedDeclarations} unsupported CSS declarations and ${stats.strippedElements} unsafe elements were removed.`,
+      detail: `${stats.strippedDeclarations} unsupported CSS declarations and ${stats.strippedElements} client-incompatible elements were removed.`,
     },
     {
       level: "info",
@@ -512,6 +618,9 @@ export function simulateEmail(input: string, options: SimulationOptions): Simula
       detail: `${stats.transformedColors} color tokens transformed; ${stats.preservedDarkColors} already-dark or light-on-dark tokens preserved.`,
     },
   ];
+  if (stats.unresolvedCss) diagnostics.push({ level: "warning", title: "Unresolved CSS", detail: `${stats.unresolvedCss} malformed CSS block${stats.unresolvedCss === 1 ? " was" : "s were"} preserved unchanged rather than guessed.`, count: stats.unresolvedCss });
+  const securityChanges = stats.securityRemovedElements + stats.securityRemovedAttributes + stats.securityRemovedDeclarations;
+  if (securityChanges) diagnostics.push({ level: "info", title: "Preview security envelope", detail: `${securityChanges} unsafe element, attribute, or declaration change${securityChanges === 1 ? "" : "s"} were applied for isolated previewing and are not reported as ${adapter.label} behavior.`, count: securityChanges });
   if (stats.gradients) diagnostics.push({ level: "info", title: "Gradient treatment", detail: `${stats.gradients} gradient declarations were preserved from the source, matching the measured ${adapter.label} ${adapter.platform} holdout.`, count: stats.gradients });
   if (stats.remoteImages) diagnostics.push({ level: "warning", title: "Remote assets", detail: `${stats.remoteImages} remote image reference${stats.remoteImages === 1 ? "" : "s"} may contact third-party servers.`, count: stats.remoteImages });
   diagnostics.push({
@@ -523,13 +632,17 @@ export function simulateEmail(input: string, options: SimulationOptions): Simula
   });
 
   return {
-    originalHtml,
+    sourceHtml: input,
+    originalPreviewHtml,
+    originalHtml: originalPreviewHtml,
     clientLightHtml,
     clientDarkHtml,
     diagnostics,
     stats,
+    ruleApplications,
+    compatibility: { profileId: adapter.compatibility.id, catalogCommit: adapter.compatibility.catalog.commit, target: adapter.compatibility.target },
     profile: { id: adapter.profile.id, label: adapter.profile.label, status: adapter.profile.status },
-    client: { id: adapter.id, label: adapter.label, platform: adapter.platform },
+    client: { id: adapter.id, label: adapter.label, platform: adapter.platform, target: adapter.compatibility.target },
   };
 }
 
