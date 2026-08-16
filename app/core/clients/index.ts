@@ -16,6 +16,8 @@ export const CLIENTS: ClientSummary[] = adapters.map((adapter) => ({
   downloadFilename: adapter.downloadFilename,
   profileLabel: adapter.profile.label,
   profileStatus: adapter.profile.status,
+  target: adapter.compatibility.target,
+  catalogCommit: adapter.compatibility.catalog.commit,
 }));
 
 export function getClientAdapter(id = DEFAULT_CLIENT_ID): ClientAdapter {
@@ -24,4 +26,4 @@ export function getClientAdapter(id = DEFAULT_CLIENT_ID): ClientAdapter {
   return adapter;
 }
 
-export type { ClientAdapter, ClientSummary, ColorAnchor, ColorTransformProfile, ProfileStatus } from "./types.ts";
+export type { CatalogObservation, ClientAdapter, ClientSummary, ClientTarget, ColorAnchor, ColorTransformProfile, EffectiveCompatibilityProfile, EffectiveRule, ExecutionState, MeasuredObservation, ProfileStatus, RuleAction, RuleApplication } from "./types.ts";

@@ -11,6 +11,10 @@ const emptyStats = () => ({
   preservedDarkColors: 0,
   gradients: 0,
   remoteImages: 0,
+  unresolvedCss: 0,
+  securityRemovedElements: 0,
+  securityRemovedAttributes: 0,
+  securityRemovedDeclarations: 0,
 });
 
 test("parses common email color formats", () => {
@@ -106,7 +110,7 @@ test("obeys a client adapter's CSS policy instead of hard-coding Gmail in the co
   const adapter = {
     ...gmailIosAdapter,
     id: "future-client",
-    supportedProperties: new Set(["color"]),
+    compatibility: { ...gmailIosAdapter.compatibility, allowedCssProperties: ["color"] },
   };
   const stats = emptyStats();
   const css = __testing.processDeclarations("background:#fff;color:#000", stats, true, adapter);

@@ -10,6 +10,10 @@ const stats = () => ({
   preservedDarkColors: 0,
   gradients: 0,
   remoteImages: 0,
+  unresolvedCss: 0,
+  securityRemovedElements: 0,
+  securityRemovedAttributes: 0,
+  securityRemovedDeclarations: 0,
 });
 
 test("preserves alpha while transforming rgba foreground colors", () => {
@@ -64,12 +68,13 @@ test("removes unsafe CSS URL schemes", () => {
     const value = stats();
     const result = __testing.processDeclarations(`background-image:url(${scheme}:payload);color:#000`, value, false);
     assert.equal(result, "color:#000");
-    assert.equal(value.strippedDeclarations, 1);
+    assert.equal(value.strippedDeclarations, 0);
+    assert.equal(value.securityRemovedDeclarations, 1);
   }
 });
 
-test("keeps https, data, and cid image URLs available to email fixtures", () => {
-  for (const url of ["https://example.com/a.png", "data:image/png;base64,AA==", "cid:hero-image"]) {
+test("keeps https and cid CSS image URLs available to email fixtures", () => {
+  for (const url of ["https://example.com/a.png", "cid:hero-image"]) {
     const value = stats();
     const result = __testing.processDeclarations(`background-image:url('${url}')`, value, false);
     assert.match(result, /background-image:url/);
@@ -77,14 +82,17 @@ test("keeps https, data, and cid image URLs available to email fixtures", () => 
   }
 });
 
-test("ignores malformed declarations without corrupting valid neighbors", () => {
-  const result = __testing.processDeclarations("broken;color:#000;also-broken;background:#fff", stats(), true);
-  assert.equal(result, "color:#ffffff;background:#212025");
+test("preserves malformed declaration blocks instead of guessing", () => {
+  const value = stats();
+  const input = "broken;color:#000;also-broken;background:#fff";
+  const result = __testing.processDeclarations(input, value, true);
+  assert.equal(result, input);
+  assert.equal(value.unresolvedCss, 1);
 });
 
-test("keeps custom properties intact for email fallback chains", () => {
+test("strips custom properties and dependent declarations for Gmail", () => {
   const result = __testing.processDeclarations("--brand:#fff;color:var(--brand);padding:4px", stats(), true);
-  assert.equal(result, "--brand:#fff;color:var(--brand);padding:4px");
+  assert.equal(result, "padding:4px");
 });
 
 test("parses case-insensitive named colors and transparent tokens", () => {
@@ -109,12 +117,11 @@ test("produces finite valid colors across a deterministic RGB matrix", () => {
   }
 });
 
-test("handles declaration values containing semicolons inside data URLs", () => {
+test("strips CSS data URLs while preserving neighboring declarations", () => {
   const result = __testing.processDeclarations(
     "background-image:url('data:image/svg+xml;utf8,<svg></svg>');color:#000",
     stats(),
     false,
   );
-  assert.match(result, /data:image\/svg\+xml;utf8/);
-  assert.match(result, /;color:#000$/);
+  assert.equal(result, "color:#000");
 });

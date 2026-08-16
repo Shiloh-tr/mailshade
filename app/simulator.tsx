@@ -7,7 +7,7 @@ import { createDiagnosticsArtifact, createTextArtifact, type TextArtifact } from
 import { DEFAULT_TEMPLATE, EMAIL_TEMPLATES, type TemplateId } from "./core/templates";
 
 type ViewMode = "grid" | "focus";
-type PreviewKey = "originalHtml" | "clientLightHtml" | "clientDarkHtml";
+type PreviewKey = "originalPreviewHtml" | "clientLightHtml" | "clientDarkHtml";
 
 const VIEWPORTS = [
   { value: 320, label: "iPhone SE · 320" },
@@ -39,7 +39,7 @@ export function Simulator() {
   const syncing = useRef(false);
   const client = CLIENTS.find((candidate) => candidate.id === clientId) ?? CLIENTS[0];
   const previews = useMemo<Array<{ key: PreviewKey; eyebrow: string; title: string; tone: string }>>(() => [
-    { key: "originalHtml", eyebrow: "01 · SOURCE", title: "Original", tone: "neutral" },
+    { key: "originalPreviewHtml", eyebrow: "01 · SOURCE", title: "Original", tone: "neutral" },
     { key: "clientLightHtml", eyebrow: `02 · ${client.lightPassLabel}`, title: client.lightPreviewTitle, tone: "light" },
     { key: "clientDarkHtml", eyebrow: `03 · ${client.darkEyebrow}`, title: client.darkPreviewTitle, tone: "dark" },
   ], [client]);
