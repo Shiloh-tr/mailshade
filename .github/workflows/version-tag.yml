@@ -1,0 +1,157 @@
+name: Version tag
+
+on:
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - closed
+
+permissions:
+  contents: write
+
+concurrency:
+  group: version-tag-main
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    name: Tag merged release
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Calculate and create version tag
+        uses: actions/github-script@v9
+        env:
+          MERGE_COMMIT_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const title = process.env.PR_TITLE ?? "";
+            const body = process.env.PR_BODY ?? "";
+            const mergeCommitSha = process.env.MERGE_COMMIT_SHA;
+            const titlePattern =
+              /^(feat|fix|perf|hotfix|build|chore|ci|docs|refactor|test)(?:\([a-z0-9._-]+\))?(!)?: .+$/;
+            const match = title.match(titlePattern);
+
+            if (!match) {
+              core.setFailed(
+                `Cannot calculate a version from pull-request title: "${title}".`
+              );
+              return;
+            }
+
+            if (!mergeCommitSha) {
+              core.setFailed("The merged pull request has no merge commit SHA.");
+              return;
+            }
+
+            const type = match[1];
+            const hasBreakingTitle = match[2] === "!";
+            const hasBreakingFooter = /^BREAKING CHANGE:\s+\S.*$/m.test(body);
+            let bump;
+
+            if (hasBreakingTitle || hasBreakingFooter) {
+              bump = "major";
+            } else if (type === "feat") {
+              bump = "minor";
+            } else if (["fix", "perf", "hotfix"].includes(type)) {
+              bump = "patch";
+            } else {
+              core.notice(`No release tag is created for pull-request type "${type}".`);
+              await core.summary
+                .addHeading("Version tag")
+                .addRaw(`No tag created for \`${title}\`.`)
+                .write();
+              return;
+            }
+
+            const tags = await github.paginate(github.rest.repos.listTags, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            });
+            const versionPattern = /^v(\d+)\.(\d+)\.(\d+)$/;
+            const versions = tags
+              .map(({ name }) => {
+                const versionMatch = name.match(versionPattern);
+                return versionMatch
+                  ? {
+                      name,
+                      major: Number(versionMatch[1]),
+                      minor: Number(versionMatch[2]),
+                      patch: Number(versionMatch[3]),
+                    }
+                  : null;
+              })
+              .filter(Boolean)
+              .sort(
+                (left, right) =>
+                  right.major - left.major ||
+                  right.minor - left.minor ||
+                  right.patch - left.patch
+              );
+
+            const current = versions[0] ?? {
+              name: "v0.0.0",
+              major: 0,
+              minor: 0,
+              patch: 0,
+            };
+            let { major, minor, patch } = current;
+
+            if (bump === "major") {
+              major += 1;
+              minor = 0;
+              patch = 0;
+            } else if (bump === "minor") {
+              minor += 1;
+              patch = 0;
+            } else {
+              patch += 1;
+            }
+
+            const nextTag = `v${major}.${minor}.${patch}`;
+            if (versions.some(({ name }) => name === nextTag)) {
+              core.setFailed(
+                `Calculated tag ${nextTag} already exists; no tag was created.`
+              );
+              return;
+            }
+
+            const { data: tagObject } = await github.rest.git.createTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: nextTag,
+              message: `Release ${nextTag}\n\n${title}`,
+              object: mergeCommitSha,
+              type: "commit",
+            });
+
+            try {
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `refs/tags/${nextTag}`,
+                sha: tagObject.sha,
+              });
+            } catch (error) {
+              if (error.status === 422) {
+                core.setFailed(
+                  `Tag ${nextTag} was created concurrently or already exists; ` +
+                    "review the repository tags before retrying."
+                );
+                return;
+              }
+              throw error;
+            }
+
+            core.notice(`Created ${nextTag} at ${mergeCommitSha}.`);
+            await core.summary
+              .addHeading("Version tag")
+              .addRaw(`Created \`${nextTag}\` from \`${title}\`.`)
+              .write();
