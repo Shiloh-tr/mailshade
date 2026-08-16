@@ -1,0 +1,28 @@
+{
+  "id": "gmail-ios-heuristic-v0",
+  "label": "Gmail iOS · working profile",
+  "status": "heuristic",
+  "surface": {
+    "preserveBelowLuminance": 0.12,
+    "target": "#121418",
+    "lightMix": 0.88,
+    "midMix": 0.64,
+    "lightThreshold": 0.55
+  },
+  "text": {
+    "preserveAboveLuminance": 0.72,
+    "target": "#f1f4f8",
+    "darkMix": 0.91,
+    "midMix": 0.72,
+    "darkThreshold": 0.18
+  },
+  "border": {
+    "darkThreshold": 0.16,
+    "darkTarget": "#696f79",
+    "darkMix": 0.52,
+    "lightTarget": "#434850",
+    "lightMix": 0.76,
+    "midMix": 0.45,
+    "lightThreshold": 0.55
+  }
+}

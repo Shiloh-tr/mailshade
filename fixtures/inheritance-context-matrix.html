@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width">
+  <style>
+    body{margin:0;background:#e8ebf2;font-family:Arial,sans-serif}
+    .shell{width:100%;padding:18px 8px;background:#e8ebf2}
+    .card{width:100%;max-width:580px;background:#ffffff;border-collapse:separate;border-spacing:0}
+    .title{padding:18px;background:#20242d;color:#ffffff;font-size:20px;font-weight:bold}
+    .row{padding:16px;font-size:17px;font-weight:bold;border-bottom:2px solid #d4d8e1}
+    .green{background:#78f0bd}.yellow{background:#fff4c2}.purple{background:#7657d6}
+    .dark-parent{color:#07110d}.light-parent{color:#ffffff}
+    .dark-child{color:#07110d}.light-child{color:#ffffff}
+    .var-parent{--surface:#78f0bd;--ink:#07110d;color:var(--ink)}
+    .var-surface{background:var(--surface)}
+  </style>
+</head>
+<body>
+  <table role="presentation" class="shell" cellpadding="0" cellspacing="0"><tr><td align="center">
+    <table role="presentation" class="card" cellpadding="0" cellspacing="0">
+      <tr><td class="title">DISCOVERY A / INHERITANCE CONTEXT</td></tr>
+      <tr class="dark-parent"><td class="row green">A1 inherited dark text / green surface</td></tr>
+      <tr class="light-parent"><td class="row green">A2 inherited light text / same green</td></tr>
+      <tr><td class="row green"><span class="dark-child">A3 nested dark child / green surface</span></td></tr>
+      <tr><td class="row green"><span class="light-child">A4 nested light child / same green</span></td></tr>
+      <tr class="dark-parent"><td class="row yellow">A5 inherited dark text / yellow surface</td></tr>
+      <tr class="light-parent"><td class="row yellow">A6 inherited light text / same yellow</td></tr>
+      <tr class="dark-parent"><td class="row purple">A7 inherited dark text / purple surface</td></tr>
+      <tr class="light-parent"><td class="row purple">A8 inherited light text / same purple</td></tr>
+      <tr class="var-parent"><td class="row var-surface">A9 CSS variables for ink and surface</td></tr>
+      <tr><td class="row" bgcolor="#78f0bd"><font color="#07110d">A10 HTML bgcolor + font color</font></td></tr>
+    </table>
+  </td></tr></table>
+</body>
+</html>

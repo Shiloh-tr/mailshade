@@ -1,0 +1,271 @@
+{
+  "id": "gmail-ios-measured-draft-2026-08-16",
+  "label": "Gmail iOS · device-validated draft v0.1",
+  "status": "validated-draft",
+  "surface": {
+    "preserveBelowLuminance": 0,
+    "target": "#8f7c87",
+    "lightMix": 1,
+    "midMix": 1,
+    "lightThreshold": 0.004351
+  },
+  "text": {
+    "preserveAboveLuminance": 1,
+    "target": "#aa96a1",
+    "darkMix": 1,
+    "midMix": 1,
+    "darkThreshold": 0.00745
+  },
+  "border": {
+    "darkThreshold": 0.26272,
+    "darkTarget": "#c2bbd9",
+    "darkMix": 1,
+    "lightTarget": "#120000",
+    "lightMix": 0.88,
+    "midMix": 0.46,
+    "lightThreshold": 0.760498
+  },
+  "calibration": {
+    "generatedAt": "2026-08-16T10:18:43.820Z",
+    "method": "anchor-residual-v1",
+    "anchors": {
+      "surface": [
+        {
+          "source": "#ffffff",
+          "target": "#212025",
+          "id": "color-matrix/white-black"
+        },
+        {
+          "source": "#f2f2f2",
+          "target": "#2b2c2e",
+          "id": "color-matrix/pale-charcoal"
+        },
+        {
+          "source": "#bdbdbd",
+          "target": "#595a5e",
+          "id": "color-matrix/mid-gray"
+        },
+        {
+          "source": "#777777",
+          "target": "#96979b",
+          "id": "color-matrix/gray-white"
+        },
+        {
+          "source": "#111111",
+          "target": "#f0f0f0",
+          "id": "color-matrix/black-white"
+        },
+        {
+          "source": "#090a0f",
+          "target": "#f8f7fc",
+          "id": "color-matrix/dark-blue"
+        },
+        {
+          "source": "#5b2dff",
+          "target": "#a57bde",
+          "id": "color-matrix/purple"
+        },
+        {
+          "source": "#7657d6",
+          "target": "#a085f0",
+          "id": "discovery-3/cascade-purple"
+        },
+        {
+          "source": "#ff7247",
+          "target": "#ad3f21",
+          "id": "color-matrix/orange"
+        }
+      ],
+      "surfaceWithDarkText": [
+        {
+          "source": "#ffffff",
+          "target": "#212025",
+          "id": "color-matrix/white-black"
+        },
+        {
+          "source": "#f2f2f2",
+          "target": "#2b2c2e",
+          "id": "color-matrix/pale-charcoal"
+        },
+        {
+          "source": "#bdbdbd",
+          "target": "#595a5e",
+          "id": "color-matrix/mid-gray"
+        },
+        {
+          "source": "#ff7247",
+          "target": "#ad3f21",
+          "id": "color-matrix/orange"
+        }
+      ],
+      "surfaceWithLightText": [
+        {
+          "source": "#777777",
+          "target": "#96979b",
+          "id": "color-matrix/gray-white"
+        },
+        {
+          "source": "#111111",
+          "target": "#f0f0f0",
+          "id": "color-matrix/black-white"
+        },
+        {
+          "source": "#090a0f",
+          "target": "#f8f7fc",
+          "id": "color-matrix/dark-blue"
+        },
+        {
+          "source": "#5b2dff",
+          "target": "#a57bde",
+          "id": "color-matrix/purple"
+        },
+        {
+          "source": "#7657d6",
+          "target": "#a085f0",
+          "id": "discovery-3/cascade-purple"
+        }
+      ],
+      "text": [
+        {
+          "source": "#000000",
+          "target": "#ffffff",
+          "id": "role-matrix/text-black"
+        },
+        {
+          "source": "#212025",
+          "target": "#fcfbff",
+          "id": "role-matrix/text-charcoal"
+        },
+        {
+          "source": "#555555",
+          "target": "#b5b5b7",
+          "id": "role-matrix/text-mid"
+        },
+        {
+          "source": "#777777",
+          "target": "#96979b",
+          "id": "role-matrix/text-gray"
+        },
+        {
+          "source": "#ffffff",
+          "target": "#212025",
+          "id": "role-matrix/text-white"
+        },
+        {
+          "source": "#c8cfe1",
+          "target": "#515865",
+          "id": "role-matrix/text-pale"
+        },
+        {
+          "source": "#5c2ffd",
+          "target": "#cd97f6",
+          "id": "role-matrix/text-purple"
+        },
+        {
+          "source": "#ff7247",
+          "target": "#cd5b3a",
+          "id": "role-matrix/text-orange"
+        },
+        {
+          "source": "#0b603b",
+          "target": "#6eb48b",
+          "id": "discovery-3/chromatic-green-text"
+        }
+      ],
+      "border": [
+        {
+          "source": "#000000",
+          "target": "#ffffff",
+          "id": "role-matrix/border-black"
+        },
+        {
+          "source": "#232323",
+          "target": "#e0e0e0",
+          "id": "role-matrix/border-charcoal"
+        },
+        {
+          "source": "#787878",
+          "target": "#96979a",
+          "id": "role-matrix/border-gray"
+        },
+        {
+          "source": "#bfbfbf",
+          "target": "#5a5b5f",
+          "id": "role-matrix/border-light"
+        },
+        {
+          "source": "#ffffff",
+          "target": "#242028",
+          "id": "role-matrix/border-white"
+        },
+        {
+          "source": "#5f2eff",
+          "target": "#b27ff2",
+          "id": "role-matrix/border-purple"
+        },
+        {
+          "source": "#fe7345",
+          "target": "#ad3e20",
+          "id": "role-matrix/border-orange"
+        },
+        {
+          "source": "#404b6d",
+          "target": "#a5b1d4",
+          "id": "role-matrix/border-bluegray"
+        }
+      ]
+    },
+    "sourceAnalyses": [
+      "captures/2026-08-16T09-55-10-855Z/color-matrix-analysis.json",
+      "captures/2026-08-16T09-55-10-855Z/role-matrix-analysis.json",
+      "captures/2026-08-16T10-56-36-629Z/discovery-3-analysis.json"
+    ],
+    "fits": {
+      "surface": {
+        "rmseRgb": 81.1968,
+        "observationCount": 8
+      },
+      "text": {
+        "rmseRgb": 76.9331,
+        "observationCount": 8
+      },
+      "border": {
+        "rmseRgb": 33.178,
+        "observationCount": 8
+      }
+    },
+    "inSampleValidation": {
+      "surface": {
+        "metric": "CIE76",
+        "median": 0,
+        "p95": 0
+      },
+      "text": {
+        "metric": "CIE76",
+        "median": 0,
+        "p95": 0
+      },
+      "border": {
+        "metric": "CIE76",
+        "median": 0,
+        "p95": 0
+      }
+    },
+    "note": "Anchors reproduce measured regions; residual interpolation handles unseen colors. Gradient and naturally dark holdouts were checked against Gmail iOS device captures before activation.",
+    "holdoutValidation": {
+      "runId": "2026-08-16T09-55-10-855Z",
+      "result": "pass",
+      "gradientDeclarations": "preserved",
+      "nestedLightNoticeDeltaE76": 1.5621,
+      "nestedGreenCtaDeltaE76": 6.838,
+      "gate": "median CIEDE2000 <= 2 and p95 CIEDE2000 <= 5 for independent sampled contextual surfaces",
+      "strictColorValidation": {
+        "analysis": "captures/2026-08-16T09-55-10-855Z/dark-native-holdout-analysis.json",
+        "releaseGateEligible": true,
+        "observationCount": 2,
+        "medianDeltaE00": 1.354,
+        "p95DeltaE00": 3.6767
+      }
+    }
+  }
+}

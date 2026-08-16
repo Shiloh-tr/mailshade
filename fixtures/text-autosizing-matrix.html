@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width">
+  <style>
+    body{margin:0;background:#edf0f5;font-family:Arial,sans-serif;color:#111111}
+    .shell{width:100%;padding:8px;background:#edf0f5}
+    .card{width:100%;max-width:580px;background:#ffffff;border-collapse:separate;border-spacing:4px}
+    .title{padding:9px;background:#20242d;color:#ffffff;font-size:14px;font-weight:bold}
+    .cell{width:50%;height:48px;padding:6px;background:#fff4c2;color:#111111;vertical-align:middle}
+    .tiny{font-size:10px;line-height:1.2}.normal{font-size:16px;line-height:1.2}.large{font-size:24px;line-height:1.05}
+    .adjust-100{-webkit-text-size-adjust:100%}.adjust-none{-webkit-text-size-adjust:none}.adjust-auto{-webkit-text-size-adjust:auto}
+    .narrow{width:118px}.nowrap{white-space:nowrap}.longword{word-break:normal}
+  </style>
+</head>
+<body>
+  <table role="presentation" class="shell" cellpadding="0" cellspacing="0"><tr><td align="center">
+    <table role="presentation" class="card" cellpadding="0" cellspacing="4">
+      <tr><td class="title" colspan="2">DISCOVERY D / GMAIL TEXT AUTO-SIZING</td></tr>
+      <tr>
+        <td class="cell tiny">T1 default 10px — alpha beta gamma delta</td>
+        <td class="cell tiny adjust-100">T2 adjust 100% — alpha beta gamma delta</td>
+      </tr>
+      <tr>
+        <td class="cell tiny adjust-none">T3 adjust none — alpha beta gamma delta</td>
+        <td class="cell tiny adjust-auto">T4 adjust auto — alpha beta gamma delta</td>
+      </tr>
+      <tr>
+        <td class="cell normal">T5 default 16px wraps this sentence twice</td>
+        <td class="cell normal adjust-none">T6 16px adjust none wraps this sentence twice</td>
+      </tr>
+      <tr>
+        <td class="cell large">T7 24px title wraps here</td>
+        <td class="cell large adjust-none">T8 24px none wraps here</td>
+      </tr>
+      <tr>
+        <td class="cell tiny narrow">T9 narrow fixed cell with several words</td>
+        <td class="cell tiny nowrap">T10 nowrap overflow probe</td>
+      </tr>
+      <tr>
+        <td class="cell tiny longword" colspan="2">T11 long token: mailshadeautosizingunbrokenmeasurementtoken</td>
+      </tr>
+      <tr>
+        <td class="cell normal" style="font-size-adjust:.5" colspan="2">T12 Gmail-documented font-size-adjust .5</td>
+      </tr>
+    </table>
+  </td></tr></table>
+</body>
+</html>

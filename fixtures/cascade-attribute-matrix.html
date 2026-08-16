@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width">
+  <style>
+    body{margin:0;background:#e9edf3;font-family:Arial,sans-serif}
+    .shell{width:100%;padding:8px;background:#e9edf3}
+    .card{width:100%;max-width:580px;background:#ffffff;border-collapse:separate;border-spacing:4px}
+    .title{padding:10px;background:#20242d;color:#ffffff;font-size:15px;font-weight:bold}
+    .cell{height:42px;padding:7px;font-size:11px;font-weight:bold;vertical-align:middle}
+    .base{background:#fff4c2;color:#111111}
+    .forced{background:#7657d6!important;color:#ffffff!important}
+    .parent{color:#111111;background:#78f0bd}
+    a{color:#0b603b}
+  </style>
+</head>
+<body>
+  <table role="presentation" class="shell" cellpadding="0" cellspacing="0"><tr><td align="center">
+    <table role="presentation" class="card" cellpadding="0" cellspacing="4">
+      <tr><td class="title" colspan="2">DISCOVERY C / CASCADE + ATTRIBUTES</td></tr>
+      <tr>
+        <td class="cell base" style="background:#ff7247;color:#111111">C1 inline beats class</td>
+        <td class="cell forced" style="background:#fff4c2;color:#111111">C2 class important</td>
+      </tr>
+      <tr>
+        <td class="cell" bgcolor="#78f0bd" style="background:#fff4c2;color:#111111">C3 style vs bgcolor</td>
+        <td class="cell parent"><font color="#ffffff">C4 font vs parent</font></td>
+      </tr>
+      <tr>
+        <td class="cell" style="background:#ffffff;color:#111111"><a href="https://example.com">C5 authored link</a></td>
+        <td class="cell" style="background:#ffffff;color:#111111"><a>C6 link without href</a></td>
+      </tr>
+      <tr>
+        <td class="cell" style="background:#ff7247;background-color:#7657d6;color:#ffffff">C7 background order</td>
+        <td class="cell" style="background:#ffffff;color:#111111;border-style:solid;border-width:5px;border-color:#000 #fff #5b2dff #ff7247">C8 four borders</td>
+      </tr>
+      <tr>
+        <td class="cell" style="background:transparent;color:#111111;outline:4px solid #5b2dff">C9 transparent + outline</td>
+        <td class="cell" style="background:#111111;color:#ffffff;opacity:.45">C10 element opacity</td>
+      </tr>
+    </table>
+  </td></tr></table>
+</body>
+</html>

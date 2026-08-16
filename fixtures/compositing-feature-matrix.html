@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width">
+  <meta name="color-scheme" content="light dark">
+  <style>
+    body{margin:0;background:#f4f4f4;color:#111111;font-family:Arial,sans-serif}
+    .shell{width:100%;padding:18px 8px;background:#f4f4f4}
+    .card{width:100%;max-width:580px;background:#ffffff;border-collapse:separate;border-spacing:0}
+    .title{padding:18px;background:#1a1d24;color:#ffffff;font-size:20px;font-weight:bold}
+    .row{height:74px;padding:14px 18px;font-size:16px;font-weight:bold;border-bottom:2px solid #d4d4d4}
+    .alpha-light{background:rgba(255,114,71,.45);color:#111111}
+    .alpha-dark{background:rgba(91,45,255,.55);color:#ffffff}
+    .shadow{background:#ffffff;color:#111111;box-shadow:inset 0 0 0 10px rgba(91,45,255,.55)}
+    .current{background:#fff4c2;color:#0b603b;border:8px solid currentColor}
+    .fallback{background:#ff7247;background:linear-gradient(90deg,rgba(91,45,255,.65),rgba(255,114,71,.65));color:#ffffff}
+    .blend{background:#ffffff;color:#111111;mix-blend-mode:multiply}
+    .webkit{background:#ffffff;color:#111111;-webkit-text-fill-color:#ff7247}
+    .mode{background:#ffffff;color:#111111}
+    @media (prefers-color-scheme:dark){.mode{background:#163d2b!important;color:#d9ffe9!important}}
+  </style>
+</head>
+<body>
+  <table role="presentation" class="shell" cellpadding="0" cellspacing="0"><tr><td align="center">
+    <table role="presentation" class="card" cellpadding="0" cellspacing="0">
+      <tr><td class="title">DISCOVERY B / COMPOSITING + FEATURES</td></tr>
+      <tr><td class="row alpha-light">B1 translucent orange over white</td></tr>
+      <tr><td class="row alpha-dark">B2 translucent purple with light text</td></tr>
+      <tr><td class="row shadow">B3 inset alpha box-shadow</td></tr>
+      <tr><td class="row current">B4 currentColor border</td></tr>
+      <tr><td class="row fallback">B5 solid fallback + alpha gradient</td></tr>
+      <tr><td class="row blend">B6 mix-blend-mode multiply</td></tr>
+      <tr><td class="row webkit">B7 webkit text fill</td></tr>
+      <tr><td class="row mode">B8 prefers-color-scheme media query</td></tr>
+      <tr><td class="row" style="background:#ffffff;color:#111111!important">B9 inline color important</td></tr>
+      <tr><td class="row" style="background-image:url('data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22580%22 height=%2274%22%3E%3Crect width=%22580%22 height=%2274%22 fill=%22%23ffffff%22/%3E%3Ccircle cx=%22520%22 cy=%2237%22 r=%2226%22 fill=%22%23000000%22/%3E%3C/svg%3E');color:#111111">B10 data SVG background image</td></tr>
+    </table>
+  </td></tr></table>
+</body>
+</html>

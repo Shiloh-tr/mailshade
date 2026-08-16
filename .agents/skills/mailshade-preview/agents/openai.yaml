@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mailshade Preview"
+  short_description: "Render email previews by client and mode"
+  default_prompt: "Use $mailshade-preview to render this email for Gmail iOS in light and dark modes."

@@ -1,0 +1,58 @@
+{
+  "client": "Gmail",
+  "platform": "iOS",
+  "device": "iPhone 15",
+  "osVersion": "26.6",
+  "clientVersion": "6.0.260803",
+  "captureRunId": "2026-08-16T09-55-10-855Z",
+  "deviceScreenshot": {
+    "width": 318,
+    "height": 701
+  },
+  "status": "verification-in-progress",
+  "activeProfile": "profiles/gmail-ios/measured-draft-2026-08-16.json",
+  "discoveryRuns": [
+    "2026-08-16T10-48-48-003Z",
+    "2026-08-16T10-56-36-629Z",
+    "2026-08-16T11-01-30-755Z"
+  ],
+  "gates": {
+    "identity": {
+      "status": "pass",
+      "evidence": "Device, iOS, Gmail build, and viewport recorded directly from the mirrored iPhone"
+    },
+    "anchorRegression": {
+      "status": "pass",
+      "evidence": "Measured surface, text, and border anchors reproduce their fitting observations"
+    },
+    "contextualHoldoutColor": {
+      "status": "pass",
+      "analysis": "captures/2026-08-16T09-55-10-855Z/dark-native-holdout-analysis.json",
+      "observationCount": 2,
+      "medianDeltaE00": 1.354,
+      "p95DeltaE00": 3.6767,
+      "thresholds": { "medianDeltaE00": 2, "p95DeltaE00": 5 }
+    },
+    "visualSimilarity": {
+      "status": "pass",
+      "method": "paired-light-dark differential",
+      "evidence": "captures/2026-08-16T11-01-30-755Z/geometry-paired.json",
+      "reason": "A raw cross-engine SSIM is not a valid Gmail dark-mode metric; paired device captures show unchanged wrapping and layout while color is gated separately."
+    },
+    "geometry": {
+      "status": "pass",
+      "thresholdPixels": 2,
+      "maximumDeltaPixels": 2,
+      "evidence": "captures/2026-08-16T11-01-30-755Z/geometry-paired.json"
+    },
+    "expandedRegressionSuite": {
+      "status": "pending",
+      "reason": "Paired device captures for the discovery matrices are incomplete"
+    },
+    "discoverySaturation": {
+      "status": "pending",
+      "requiredConsecutiveBatches": 3,
+      "completedConsecutiveBatches": 0
+    }
+  }
+}

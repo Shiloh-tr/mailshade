@@ -1,0 +1,120 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { __testing } from "../app/core/email-simulator.ts";
+
+const stats = () => ({
+  strippedElements: 0,
+  strippedAttributes: 0,
+  strippedDeclarations: 0,
+  transformedColors: 0,
+  preservedDarkColors: 0,
+  gradients: 0,
+  remoteImages: 0,
+});
+
+test("preserves alpha while transforming rgba foreground colors", () => {
+  const result = __testing.processDeclarations("color:rgba(255,255,255,.42)", stats(), true);
+  assert.match(result, /^color:rgba\(33, 32, 37, 0\.42\)$/);
+});
+
+test("transforms colors inside border shorthands without changing geometry", () => {
+  const result = __testing.processDeclarations("border:3px dashed #5f2eff", stats(), true);
+  assert.equal(result, "border:3px dashed #b27ff2");
+});
+
+test("preserves gradients but still transforms a separate fallback background color", () => {
+  const value = stats();
+  const result = __testing.processDeclarations(
+    "background-color:#fff;background-image:linear-gradient(90deg,#000,#fff);color:#000",
+    value,
+    true,
+  );
+  assert.match(result, /background-color:#212025/);
+  assert.match(result, /linear-gradient\(90deg,#000,#fff\)/);
+  assert.match(result, /color:#ffffff/);
+  assert.equal(value.gradients, 1);
+});
+
+test("retains supported nested media rules and transforms their declarations", () => {
+  const result = __testing.processStyleSheet(
+    "@media screen and (max-width:600px){.card{background:#fff;color:#000;padding:12px}}",
+    stats(),
+    true,
+  );
+  assert.match(result, /^@media screen/);
+  assert.match(result, /background:#212025/);
+  assert.match(result, /color:#ffffff/);
+  assert.match(result, /padding:12px/);
+});
+
+test("drops unsupported at-rules and attribute selectors", () => {
+  const value = stats();
+  const result = __testing.processStyleSheet(
+    "@supports(display:grid){.x{color:red}}[data-secret]{background:#fff}.safe{color:#000}",
+    value,
+    true,
+  );
+  assert.doesNotMatch(result, /@supports|data-secret/);
+  assert.match(result, /\.safe\{color:#ffffff\}/);
+  assert.ok(value.strippedDeclarations >= 2);
+});
+
+test("removes unsafe CSS URL schemes", () => {
+  for (const scheme of ["javascript", "vbscript", "file"]) {
+    const value = stats();
+    const result = __testing.processDeclarations(`background-image:url(${scheme}:payload);color:#000`, value, false);
+    assert.equal(result, "color:#000");
+    assert.equal(value.strippedDeclarations, 1);
+  }
+});
+
+test("keeps https, data, and cid image URLs available to email fixtures", () => {
+  for (const url of ["https://example.com/a.png", "data:image/png;base64,AA==", "cid:hero-image"]) {
+    const value = stats();
+    const result = __testing.processDeclarations(`background-image:url('${url}')`, value, false);
+    assert.match(result, /background-image:url/);
+    assert.equal(value.strippedDeclarations, 0);
+  }
+});
+
+test("ignores malformed declarations without corrupting valid neighbors", () => {
+  const result = __testing.processDeclarations("broken;color:#000;also-broken;background:#fff", stats(), true);
+  assert.equal(result, "color:#ffffff;background:#212025");
+});
+
+test("keeps custom properties intact for email fallback chains", () => {
+  const result = __testing.processDeclarations("--brand:#fff;color:var(--brand);padding:4px", stats(), true);
+  assert.equal(result, "--brand:#fff;color:var(--brand);padding:4px");
+});
+
+test("parses case-insensitive named colors and transparent tokens", () => {
+  const value = stats();
+  assert.equal(__testing.transformColorTokens("WHITE transparent Navy", "text", value), "#212025 transparent #bfcbdb");
+  assert.equal(value.transformedColors, 2);
+});
+
+test("produces finite valid colors across a deterministic RGB matrix", () => {
+  const value = stats();
+  for (let red = 0; red <= 255; red += 51) {
+    for (let green = 0; green <= 255; green += 51) {
+      for (let blue = 0; blue <= 255; blue += 51) {
+        const input = `#${[red, green, blue].map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
+        for (const role of ["surface", "text", "border"] as const) {
+          const output = __testing.transformColorTokens(input, role, value);
+          assert.match(output, /^#[0-9a-f]{6}$/i);
+          assert.doesNotMatch(output, /nan|undefined/i);
+        }
+      }
+    }
+  }
+});
+
+test("handles declaration values containing semicolons inside data URLs", () => {
+  const result = __testing.processDeclarations(
+    "background-image:url('data:image/svg+xml;utf8,<svg></svg>');color:#000",
+    stats(),
+    false,
+  );
+  assert.match(result, /data:image\/svg\+xml;utf8/);
+  assert.match(result, /;color:#000$/);
+});

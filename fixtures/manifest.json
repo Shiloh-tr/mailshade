@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "fixtures": [
+    {
+      "id": "color-matrix",
+      "file": "color-matrix.html",
+      "category": "instrumented",
+      "description": "Foreground/background thresholds, alpha, nested surfaces and borders"
+    },
+    {
+      "id": "gradient-matrix",
+      "file": "gradient-matrix.html",
+      "category": "instrumented",
+      "description": "Linear, radial, repeating, transparent and layered gradients"
+    },
+    {
+      "id": "role-matrix",
+      "file": "role-matrix.html",
+      "category": "instrumented",
+      "description": "Large-glyph foreground colors and isolated border-color thresholds"
+    },
+    {
+      "id": "dark-native-holdout",
+      "file": "dark-native-holdout.html",
+      "category": "holdout",
+      "description": "Naturally dark launch email with deliberately light nested content"
+    },
+    {
+      "id": "inheritance-context-matrix",
+      "file": "inheritance-context-matrix.html",
+      "category": "discovery",
+      "description": "Inherited and nested text polarity, CSS variables, and legacy HTML color attributes"
+    },
+    {
+      "id": "compositing-feature-matrix",
+      "file": "compositing-feature-matrix.html",
+      "category": "discovery",
+      "description": "Alpha compositing, shadows, currentColor, media queries, blend modes, and data SVG"
+    },
+    {
+      "id": "cascade-attribute-matrix",
+      "file": "cascade-attribute-matrix.html",
+      "category": "discovery",
+      "description": "Cascade precedence, legacy HTML attributes, links, four-sided borders, outlines, and element opacity"
+    },
+    {
+      "id": "dark-gradient-holdout-2",
+      "file": "dark-gradient-holdout-2.html",
+      "category": "discovery",
+      "description": "Naturally dark solids with linear, radial, repeating, and alpha gradients plus mixed nested surfaces"
+    },
+    {
+      "id": "text-autosizing-matrix",
+      "file": "text-autosizing-matrix.html",
+      "category": "discovery",
+      "description": "Gmail iOS typography auto-sizing across text-size-adjust, font sizes, wrapping, fixed widths, nowrap, and long tokens"
+    },
+    {
+      "id": "chromatic-role-holdout",
+      "file": "chromatic-role-holdout.html",
+      "category": "holdout",
+      "description": "Independent chromatic text, link, and currentColor cases on light and dark surfaces"
+    },
+    {
+      "id": "layered-gradient-holdout",
+      "file": "layered-gradient-holdout.html",
+      "category": "holdout",
+      "description": "Multi-stop, repeating, layered, transparent, light, and naturally dark gradients"
+    },
+    {
+      "id": "legacy-inheritance-holdout",
+      "file": "legacy-inheritance-holdout.html",
+      "category": "holdout",
+      "description": "Independent inheritance, legacy attributes, important cascade, transparency, and opacity cases"
+    }
+  ]
+}

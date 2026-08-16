@@ -1,0 +1,37 @@
+{
+  "color-matrix": [
+    { "id": "white-black", "role": "surface", "x": 0.02, "y": 0.03, "width": 0.21, "height": 0.11 },
+    { "id": "pale-charcoal", "role": "surface", "x": 0.27, "y": 0.03, "width": 0.21, "height": 0.11 },
+    { "id": "mid-gray", "role": "surface", "x": 0.52, "y": 0.03, "width": 0.21, "height": 0.11 },
+    { "id": "gray-white", "role": "surface", "x": 0.77, "y": 0.03, "width": 0.21, "height": 0.11 },
+    { "id": "black-white", "role": "surface", "x": 0.02, "y": 0.21, "width": 0.21, "height": 0.11 },
+    { "id": "dark-blue", "role": "surface", "x": 0.27, "y": 0.21, "width": 0.21, "height": 0.11 },
+    { "id": "purple", "role": "surface", "x": 0.52, "y": 0.21, "width": 0.21, "height": 0.11 },
+    { "id": "orange", "role": "surface", "x": 0.77, "y": 0.21, "width": 0.21, "height": 0.11 }
+  ],
+  "gradient-matrix": [
+    { "id": "linear-start", "x": 0.05, "y": 0.04, "width": 0.12, "height": 0.09 },
+    { "id": "linear-middle", "x": 0.44, "y": 0.04, "width": 0.12, "height": 0.09 },
+    { "id": "linear-end", "x": 0.82, "y": 0.04, "width": 0.12, "height": 0.09 },
+    { "id": "radial-light", "x": 0.76, "y": 0.22, "width": 0.12, "height": 0.09 },
+    { "id": "dark-gradient", "x": 0.42, "y": 0.70, "width": 0.16, "height": 0.09 }
+  ],
+  "role-matrix": [
+    { "id": "text-black", "role": "text", "sampleMode": "foreground", "x": 0.02, "y": 0.03, "width": 0.21, "height": 0.20 },
+    { "id": "text-charcoal", "role": "text", "sampleMode": "foreground", "x": 0.27, "y": 0.03, "width": 0.21, "height": 0.20 },
+    { "id": "text-mid", "role": "text", "sampleMode": "foreground", "x": 0.52, "y": 0.03, "width": 0.21, "height": 0.20 },
+    { "id": "text-gray", "role": "text", "sampleMode": "foreground", "x": 0.77, "y": 0.03, "width": 0.21, "height": 0.20 },
+    { "id": "text-white", "role": "text", "sampleMode": "foreground", "x": 0.02, "y": 0.29, "width": 0.21, "height": 0.20 },
+    { "id": "text-pale", "role": "text", "sampleMode": "foreground", "x": 0.27, "y": 0.29, "width": 0.21, "height": 0.20 },
+    { "id": "text-purple", "role": "text", "sampleMode": "foreground", "x": 0.52, "y": 0.29, "width": 0.21, "height": 0.20 },
+    { "id": "text-orange", "role": "text", "sampleMode": "foreground", "x": 0.77, "y": 0.29, "width": 0.21, "height": 0.20 },
+    { "id": "border-black", "role": "border", "x": 0.04, "y": 0.535, "width": 0.17, "height": 0.035 },
+    { "id": "border-charcoal", "role": "border", "x": 0.29, "y": 0.535, "width": 0.17, "height": 0.035 },
+    { "id": "border-gray", "role": "border", "x": 0.54, "y": 0.535, "width": 0.17, "height": 0.035 },
+    { "id": "border-light", "role": "border", "x": 0.79, "y": 0.535, "width": 0.17, "height": 0.035 },
+    { "id": "border-white", "role": "border", "x": 0.04, "y": 0.765, "width": 0.17, "height": 0.035 },
+    { "id": "border-purple", "role": "border", "x": 0.29, "y": 0.765, "width": 0.17, "height": 0.035 },
+    { "id": "border-orange", "role": "border", "x": 0.54, "y": 0.765, "width": 0.17, "height": 0.035 },
+    { "id": "border-bluegray", "role": "border", "x": 0.79, "y": 0.765, "width": 0.17, "height": 0.035 }
+  ]
+}
