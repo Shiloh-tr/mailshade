@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "outlook-ios-catalog-candidate-2026-08-17",
+  "capability": "catalog-only",
+  "catalog": {
+    "commit": "1f500feec9df3241bfe679b16101d1ee449e67e9",
+    "client": "outlook",
+    "platform": "ios"
+  },
+  "target": {
+    "client": "outlook",
+    "platform": "ios",
+    "appVersion": "5.2630.0",
+    "osVersion": "26.6",
+    "device": "iPhone 15",
+    "accountType": "Microsoft 365",
+    "capturedAt": "2026-08-17"
+  },
+  "capture": {
+    "runId": "2026-08-16T20-23-37-899Z",
+    "screenshotViewport": { "width": 318, "height": 701 },
+    "emailBodyCrop": { "left": 20, "top": 350, "width": 278, "height": 230 },
+    "appearanceModes": ["Light", "Dark"]
+  },
+  "measuredBehaviors": [
+    { "featureId": "css-at-media-prefers-color-scheme", "result": "supported-in-dark", "fixture": "outlook-dark-mode-matrix" },
+    { "featureId": "mailshade-outlook-data-attributes", "result": "data-ogsc/data-ogsb/data-ogac/data-ogab observed", "fixture": "outlook-dark-mode-matrix" },
+    { "featureId": "css-selector-attribute", "result": "supported for measured selector forms", "fixture": "outlook-dark-mode-matrix" },
+    { "featureId": "css-variables", "result": "unsupported; fallback used", "fixture": "outlook-dark-mode-matrix" },
+    { "featureId": "css-linear-gradient", "result": "unsupported; solid fallback used", "fixture": "outlook-dark-mode-matrix" }
+  ],
+  "activation": {
+    "status": "blocked-by-device-gate",
+    "reason": "Two independent color holdouts exceeded the release thresholds. No executable adapter is registered."
+  }
+}

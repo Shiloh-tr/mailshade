@@ -155,8 +155,8 @@ export function Simulator() {
           )}
 
           <div className="calibration-banner" role="status">
-            <strong>Checked against {client.label} on {client.platform}.</strong>
-            <span>The selected draft uses paired light/dark captures and passed its documented holdouts. Coverage is fixture- and build-specific.</span>
+            <strong>Profile-based {client.label} on {client.platform} preview.</strong>
+            <span>The displayed email is an approximation, not a claim that this message matches the device. The adapter passed only its documented fixture holdouts for the listed app build.</span>
           </div>
 
           <div className={`preview-grid ${viewMode}`}>

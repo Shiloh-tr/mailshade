@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    :root{color-scheme:light dark;--probe-bg:#fff4c2;--probe-fg:#342806}
+    body{margin:0;background:#f4f4f4;color:#111111;font-family:Arial,sans-serif}
+    .shell{width:100%;padding:18px 8px;background:#f4f4f4}
+    .card{width:100%;max-width:580px;background:#ffffff;border-collapse:separate;border-spacing:0}
+    .title{padding:18px;background:#10213a;color:#ffffff;font-size:20px;font-weight:bold}
+    .row{height:72px;padding:14px 18px;font-size:15px;font-weight:bold;border-bottom:2px solid #d4d4d4;background:#ffffff;color:#111111}
+    .media-probe,.ogsc-probe{background:#fff4c2;color:#342806}
+    .ogsb-probe{background:#ff7247;color:#221109}
+    .ogac-probe{background:#e8f0ff;color:#19315c}
+    .ogab-probe{background:#dff8ec;color:#0b603b}
+    .variable-probe{background:var(--probe-bg);color:var(--probe-fg)}
+    .gradient-probe{background:#5b2cff;background-image:linear-gradient(90deg,#5b2cff,#ff7247);color:#ffffff}
+    [data-probe]{outline:5px solid #5b2cff}
+    td[data-probe="exact"]{border-left:12px solid #ff7247}
+    [data-probe~="token"]{border-right:12px solid #0b603b}
+    [data-ogsc] .ogsc-probe{background:#163d2b!important;color:#d9ffe9!important}
+    [data-ogsb]{box-shadow:inset 0 0 0 8px #00a6ff!important}
+    [data-ogac]{outline:7px solid #ff2f92!important}
+    [data-ogab]{border-bottom:10px solid #7c4dff!important}
+    @media (prefers-color-scheme:dark){.media-probe{background:#27183c!important;color:#f4e8ff!important}}
+  </style>
+</head>
+<body>
+  <table role="presentation" class="shell" cellpadding="0" cellspacing="0"><tr><td align="center">
+    <table role="presentation" class="card" cellpadding="0" cellspacing="0">
+      <tr><td class="title">OUTLOOK IOS / DARK MODE PROBES</td></tr>
+      <tr><td class="row media-probe">O1 prefers-color-scheme</td></tr>
+      <tr><td class="row ogsc-probe">O2 data-ogsc ancestor selector</td></tr>
+      <tr><td class="row ogsb-probe" style="background:#ff7247">O3 data-ogsb injection</td></tr>
+      <tr><td class="row ogac-probe" style="color:#19315c">O4 data-ogac injection</td></tr>
+      <tr><td class="row ogab-probe" style="background:#dff8ec">O5 data-ogab injection</td></tr>
+      <tr><td class="row variable-probe">O6 custom properties</td></tr>
+      <tr><td class="row gradient-probe">O7 gradient with solid fallback</td></tr>
+      <tr><td class="row" data-probe="exact token">O8 attribute selector forms</td></tr>
+    </table>
+  </td></tr></table>
+</body>
+</html>

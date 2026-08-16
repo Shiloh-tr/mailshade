@@ -24,7 +24,7 @@ test("server-renders the Mailshade application shell", async () => {
   assert.match(html, /See what inboxes/i);
   assert.match(html, /Email client/i);
   assert.match(html, /Rendered previews/i);
-  assert.match(html, /Checked against[\s\S]*Gmail[\s\S]*on[\s\S]*iOS/i);
+  assert.match(html, /Profile-based[\s\S]*Gmail[\s\S]*on[\s\S]*iOS[\s\S]*approximation, not a claim/i);
   assert.match(html, /DEVICE-VALIDATED DRAFT/i);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
 });

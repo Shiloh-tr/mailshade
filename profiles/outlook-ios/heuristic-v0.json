@@ -1,0 +1,31 @@
+{
+  "id": "outlook-ios-heuristic-v0",
+  "label": "Outlook iOS · unmeasured seed",
+  "status": "heuristic",
+  "surface": {
+    "preserveBelowLuminance": 0,
+    "target": "#141414",
+    "lightMix": 0.92,
+    "midMix": 0.72,
+    "lightThreshold": 0.75
+  },
+  "text": {
+    "preserveAboveLuminance": 1,
+    "target": "#ffffff",
+    "darkMix": 1,
+    "midMix": 0.58,
+    "darkThreshold": 0.25
+  },
+  "border": {
+    "darkThreshold": 0.25,
+    "darkTarget": "#ffffff",
+    "darkMix": 1,
+    "lightTarget": "#141414",
+    "lightMix": 0.9,
+    "midMix": 0.55,
+    "lightThreshold": 0.75
+  },
+  "calibration": {
+    "baselineRadius": 96
+  }
+}

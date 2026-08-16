@@ -1,4 +1,4 @@
-# Gmail iOS calibration
+# Client calibration
 
 ## 1. Prepare
 
@@ -6,7 +6,7 @@ Use a dedicated sender and test inbox. Put SMTP credentials only in the ignored 
 
 ## 2. Capture
 
-On the same device and Gmail build, capture each fixture once in iOS light appearance and once in dark appearance. Crop both images to identical email-body bounds. Record the device model, CSS viewport, iOS version, Gmail version, fixture subject and capture date.
+On the same device and client build, capture each fixture once in the client’s explicit light appearance and once in dark appearance. Crop both images to identical email-body bounds. Record the device model, CSS viewport, iOS version, client version, account type, fixture subject, capture date, and run ID.
 
 ## 3. Measure
 

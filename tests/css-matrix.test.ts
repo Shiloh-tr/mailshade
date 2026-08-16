@@ -82,6 +82,15 @@ test("keeps https and cid CSS image URLs available to email fixtures", () => {
   }
 });
 
+test("never rewrites named color words or hex-like text inside CSS image URLs", () => {
+  const value = stats();
+  const url = "https://assets.example.com/backgrounds/card-gradient-dark-to-green-v3-rgb.png?palette=#fff";
+  const result = __testing.processDeclarations(`background:#10110e url('${url}') center/cover no-repeat`, value, true);
+  assert.match(result, new RegExp(url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  assert.doesNotMatch(result, /dark-to-#/);
+  assert.equal(value.securityRemovedDeclarations, 0);
+});
+
 test("preserves malformed declaration blocks instead of guessing", () => {
   const value = stats();
   const input = "broken;color:#000;also-broken;background:#fff";

@@ -10,7 +10,7 @@ export function validationScopeFor(analysisPath, sourceAnalyses = [], baseDirect
 export function validateProfileGroup(profile, role, observations, anchorKey, surfaceContext) {
   const anchors = profile.calibration?.anchors?.[anchorKey] ?? [];
   const validation = anchors.length
-    ? validateAnchorProfile(observations, anchors, surfaceContext)
+    ? validateAnchorProfile(observations, anchors, surfaceContext, profile.calibration?.baselineRadius)
     : validateRoleProfile(observations, role, profile[role]);
   return {
     role,

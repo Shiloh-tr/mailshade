@@ -61,7 +61,7 @@ export function baselineInvert(rgb, surfaceContext) {
   return hslToRgb([hue, saturation * 0.7, 0.13 + 0.87 * (1 - lightness)]);
 }
 
-export function predictAnchored(rgb, anchors, surfaceContext) {
+export function predictAnchored(rgb, anchors, surfaceContext, baselineRadius) {
   if (!anchors?.length) return baselineInvert(rgb, surfaceContext);
   const parsed = anchors.map((anchor) => ({ source: hexToRgb(anchor.source), target: hexToRgb(anchor.target) }));
   const exact = parsed.find((anchor) => anchor.source.every((channel, index) => Math.abs(channel - rgb[index]) <= 2));
@@ -72,7 +72,8 @@ export function predictAnchored(rgb, anchors, surfaceContext) {
     .sort((left, right) => left.distance - right.distance)
     .slice(0, Math.min(4, parsed.length));
   const interpolated = [0, 1, 2].map((channel) => {
-    const baselineWeight = 1 / ((surfaceContext ? 6 : 96) ** 2);
+    const radius = baselineRadius ?? (surfaceContext ? 6 : 96);
+    const baselineWeight = 1 / (radius ** 2);
     let total = baseline[channel] * baselineWeight;
     let weights = baselineWeight;
     for (const anchor of nearest) {
@@ -438,9 +439,9 @@ export function anchorsFromObservations(observations) {
   return observations.map((observation) => ({ source: rgbToHex(observation.light), target: rgbToHex(observation.dark), id: observation.id }));
 }
 
-export function validateAnchorProfile(observations, anchors, surfaceContext) {
+export function validateAnchorProfile(observations, anchors, surfaceContext, baselineRadius) {
   const regions = observations.map((observation) => {
-    const predicted = predictAnchored(observation.light, anchors, surfaceContext);
+    const predicted = predictAnchored(observation.light, anchors, surfaceContext, baselineRadius);
     return {
       id: observation.id,
       expected: observation.dark,
