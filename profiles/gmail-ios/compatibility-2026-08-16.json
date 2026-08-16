@@ -81,7 +81,7 @@
     },
     {
       "id": "gmail-ios-webkit-text-fill",
-      "featureId": "css-webkit-text-fill-color",
+      "featureId": "mailshade-webkit-text-fill-color",
       "domain": "css-property",
       "matcher": { "property": "-webkit-text-fill-color" },
       "action": "drop-declaration",
@@ -137,7 +137,8 @@
     },
     {
       "id": "gmail-ios-gradient-preservation",
-      "featureId": "css-gradients",
+      "featureId": "mailshade-gradient-preservation",
+      "catalogFeatureIds": ["css-linear-gradient", "css-radial-gradient", "css-conic-gradient"],
       "domain": "css-value",
       "matcher": { "functionSuffix": "gradient" },
       "action": "preserve",

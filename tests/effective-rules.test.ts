@@ -16,6 +16,11 @@ test("keeps exact source separate from a security-wrapped original preview", () 
   assert.match(result.clientLightHtml, /<input name="email">/i);
   assert.equal(result.stats.securityRemovedElements, 1);
   assert.equal(result.stats.strippedElements, 0);
+  assert.equal(result.modeStats.original.strippedDeclarations, 0);
+  assert.equal(result.modeStats.original.transformedColors, 0);
+  assert.equal(result.modeStats.original.securityRemovedElements, 1);
+  assert.deepEqual(result.modeRuleApplications.original, []);
+  assert.ok(result.modeDiagnostics.original.every((diagnostic) => !/compatibility|dark-mode/i.test(diagnostic.title)));
 });
 
 test("applies deterministic Gmail style, selector, and media rules", () => {
@@ -45,4 +50,3 @@ test("reports measured compatibility rules independently from preview security",
   assert.ok(result.ruleApplications.some((application) => application.ruleId === "gmail-ios-css-data-url"));
   assert.equal(result.stats.securityRemovedElements, 0);
 });
-

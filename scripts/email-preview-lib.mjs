@@ -61,11 +61,36 @@ export function selectModes(mode) {
   return mode === "all" ? PREVIEW_MODES : [mode];
 }
 
+export function resolvePreviewClientIds(requested, clients, catalogTargets = []) {
+  if (requested === "all") return clients.map(({ id }) => id);
+  const clientId = requested ?? clients[0]?.id;
+  if (clients.some(({ id }) => id === clientId)) return [clientId];
+  if (catalogTargets.includes(clientId)) throw new Error(`Catalog-only target '${clientId}' has no executable adapter. Use npm run compatibility:query instead.`);
+  throw new Error(`Unknown client '${clientId}'. Registered executable clients: ${clients.map(({ id }) => id).join(", ")}`);
+}
+
 export function htmlForMode(result, mode) {
   if (mode === "original") return result.originalPreviewHtml ?? result.originalHtml;
   if (mode === "light") return result.clientLightHtml;
   if (mode === "dark") return result.clientDarkHtml;
   throw new Error(`Unknown mode '${mode}'.`);
+}
+
+export function manifestArtifact(result, mode, htmlPath, pngPath) {
+  return {
+    client: result.client,
+    profile: result.profile,
+    compatibility: {
+      ...result.compatibility,
+      appliedMeasuredOverrides: result.modeRuleApplications[mode].filter((application) => application.evidence === "measured"),
+      unresolvedRules: result.modeStats[mode].unresolvedCss,
+    },
+    mode,
+    html: path.basename(htmlPath),
+    png: path.basename(pngPath),
+    stats: result.modeStats[mode],
+    diagnostics: result.modeDiagnostics[mode],
+  };
 }
 
 export function chromeCandidates(platform = process.platform, env = process.env) {

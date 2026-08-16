@@ -1,9 +1,11 @@
 import { access, readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import { auditCompatibility } from "./audit-compatibility.mjs";
 
 const verificationPath = new URL("../profiles/gmail-ios/verification-2026-08-16.json", import.meta.url);
 const root = new URL("../", import.meta.url);
 const verification = JSON.parse(await readFile(verificationPath, "utf8"));
-const failures = [];
+const failures = [...auditCompatibility(fileURLToPath(new URL("../", import.meta.url))).failures];
 
 for (const field of ["client", "platform", "device", "osVersion", "clientVersion", "captureRunId"]) {
   if (!verification[field]) failures.push(`missing identity field: ${field}`);

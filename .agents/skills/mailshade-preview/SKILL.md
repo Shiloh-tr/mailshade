@@ -1,39 +1,43 @@
 ---
 name: mailshade-preview
-description: Render local email HTML into Mailshade previews selected by email, registered client, mode, and viewport. Use when Codex or Claude is asked to preview, screenshot, compare, or inspect an email in original, client-light, or client-dark rendering; produce HTML and PNG artifacts; or run a client/mode comparison matrix.
+description: Render local email HTML with Mailshade's executable client adapters by client, mode, and viewport. Use when Codex, ChatGPT, Claude, or another Agent Skills host is asked to preview, screenshot, compare, or inspect an email in Original, client-light, or client-dark rendering; produce HTML and PNG artifacts; or run an executable client/mode matrix.
 ---
 
 # Mailshade Preview
 
-Render an email through Mailshade's registered client profiles and return both transformed HTML and an invisible headless-browser screenshot. Work locally from HTML supplied as a file or pasted by the user; do not retrieve mailbox messages or send email.
+Render supplied local HTML through registered executable adapters. Do not retrieve mailbox messages, send email, or substitute a catalog-only client.
 
-## Render a preview
+## Render
 
 1. Work from the Mailshade repository root containing `mailshade-email-dark-mode-simulator` in `package.json`.
-2. Use the user's HTML file unchanged. For pasted HTML, save the exact text to a temporary `.html` file outside tracked source.
-3. Discover current client IDs with `npm run preview -- --help` when the user names a client or requests all clients. Never invent an unregistered client or silently substitute one.
-4. Map the requested mode to `original`, `light`, `dark`, or `all`. Treat “source” as `original`; use `all` for comparisons.
-5. Run the preview command. Use a 390px viewport unless the user requests another width:
+2. Preserve a supplied HTML file. Save pasted HTML exactly in a temporary untracked `.html` file.
+3. Run `npm run preview -- --help` to discover executable client IDs. `--client all` means all executable adapters, not all catalog targets.
+4. Map the request to `original`, `light`, `dark`, or `all`. Use `all` for “both modes” so the result includes the Original baseline plus client light and dark.
+5. Render at 390px unless the user specifies a viewport:
 
 ```bash
-npm run preview -- --input path/to/email.html --client gmail-ios --mode dark --viewport 390
+npm run preview -- --input path/to/email.html --client gmail-ios --mode all --viewport 390
 ```
 
-Use `--client all --mode all` for every registered client/mode combination. Use `--output <directory>` only when the user requests a destination.
+Remote images load by default and may contact asset or tracking servers. Add `--block-remote-images` for privacy, offline work, or deterministic local output. Do not change this policy silently.
 
-Remote images load by default for visual fidelity and may contact tracking or asset servers. Add `--block-remote-images` when the user requests privacy, offline rendering, or deterministic local-only output. Do not change this policy silently.
+Use installed headless Chrome or Chromium. If detection fails, pass `--chrome <executable>` or set `MAILSHADE_CHROME_PATH`; do not open a visible browser or replace Mailshade's transform with browser color-scheme emulation.
 
-The command uses installed Chrome or Chromium in headless mode; it must not open a visible window. If automatic detection fails, use `--chrome <executable>` or `MAILSHADE_CHROME_PATH`. Do not replace the measured Mailshade transform with browser color-scheme emulation.
+## Report
 
-## Return results
+Read the generated `manifest.json` and verify every requested artifact has HTML and PNG files. Return clickable artifacts and display PNGs inline where supported. Report:
 
-Read `manifest.json` from the reported output directory. Verify that every requested combination has both `.html` and `.png` files and surface any warnings from `diagnostics`.
+- exact client target, application/OS/device/account context, and mode;
+- catalog snapshot commit and executable compatibility profile;
+- color-profile validation status;
+- applied measured overrides and unresolved CSS rules;
+- viewport and remote-image policy;
+- warnings from diagnostics.
 
-Return clickable links to the PNG, HTML, and manifest. Display the PNG inline when the client supports local image rendering. Briefly state the client, mode, viewport, profile status, and whether remote images were loaded. Keep claims calibrated: a Mailshade preview is a profile-based simulation, not a guarantee of every inbox build.
+Call the output a profile-based simulation, not a guarantee for every inbox build.
 
-## Failure handling
+## Reject unsupported rendering
 
-- On an unknown client or mode, show the registered values from `--help` and ask for a valid selection only if intent cannot be mapped.
-- On missing dependencies, install from the repository lockfile with `npm install`, then retry.
-- On a missing browser, report the supported Chrome override rather than opening a GUI browser.
-- Preserve generated HTML even when PNG rendering fails, and report the exact failure and artifact directory.
+Never render or substitute a catalog-only target. The preview command rejects targets such as `outlook/windows` and directs the user to `npm run compatibility:query`. Use `$mailshade-compatibility` when the user wants support evidence or cross-client comparison without a registered adapter.
+
+If PNG rendering fails, preserve generated HTML and report the exact error and artifact directory.
