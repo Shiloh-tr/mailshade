@@ -1,0 +1,47 @@
+name: Repository policy
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-policy-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  policy:
+    name: policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Validate branch name
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+        shell: bash
+        run: |
+          allowed='^(feat|fix|chore|docs|refactor|test|ci|build|perf|hotfix)/[a-z0-9]+([._-][a-z0-9]+)*$'
+          if [[ ! "$HEAD_BRANCH" =~ $allowed ]] && [[ ! "$HEAD_BRANCH" =~ ^dependabot/ ]]; then
+            echo "::error::Branch '$HEAD_BRANCH' must follow <type>/<short-description>."
+            exit 1
+          fi
+
+      - name: Validate pull-request title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        shell: bash
+        run: |
+          allowed='^(feat|fix|chore|docs|refactor|test|ci|build|perf|hotfix)(\([a-z0-9._-]+\))?!?: .+$'
+          if [[ ! "$PR_TITLE" =~ $allowed ]]; then
+            echo "::error::Use a Conventional Commit title, for example: feat: add Outlook dark-mode profile"
+            exit 1
+          fi
