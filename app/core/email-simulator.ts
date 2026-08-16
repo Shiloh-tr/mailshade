@@ -334,11 +334,19 @@ function processDeclarations(block: string, stats: MutableStats, dark: boolean, 
     if (colon < 1) continue;
     const property = declaration.slice(0, colon).trim().toLowerCase();
     let value = declaration.slice(colon + 1).trim();
+    if (!adapter.supportsCustomProperties && (property.startsWith("--") || /\bvar\s*\(/i.test(value))) {
+      stats.strippedDeclarations += 1;
+      continue;
+    }
     if (!adapter.supportedProperties.has(property) && !property.startsWith("--")) {
       stats.strippedDeclarations += 1;
       continue;
     }
     if (/url\(\s*(['"]?)\s*(?:javascript|vbscript|file):/i.test(value)) {
+      stats.strippedDeclarations += 1;
+      continue;
+    }
+    if (!adapter.supportsCssDataUrls && /url\(\s*(['"]?)\s*data:/i.test(value)) {
       stats.strippedDeclarations += 1;
       continue;
     }

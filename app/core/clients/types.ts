@@ -48,6 +48,8 @@ export interface ClientAdapter {
   darkEyebrow: string;
   downloadFilename: string;
   supportedProperties: ReadonlySet<string>;
+  supportsCustomProperties: boolean;
+  supportsCssDataUrls: boolean;
   preserveGradients: boolean;
   profile: ColorTransformProfile;
 }

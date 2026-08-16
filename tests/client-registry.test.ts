@@ -9,6 +9,8 @@ test("registers Gmail iOS behind the generic client adapter boundary", () => {
   assert.equal(adapter.profile.status, "validated-draft");
   assert.ok(adapter.supportedProperties.has("background"));
   assert.ok(adapter.supportedProperties.has("font-size-adjust"));
+  assert.equal(adapter.supportsCustomProperties, false);
+  assert.equal(adapter.supportsCssDataUrls, false);
   assert.ok(adapter.supportedProperties.has("border-bottom-color"));
   assert.ok(adapter.supportedProperties.has("writing-mode"));
   assert.equal(adapter.supportedProperties.has("-webkit-text-size-adjust"), false);

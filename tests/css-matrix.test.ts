@@ -68,8 +68,8 @@ test("removes unsafe CSS URL schemes", () => {
   }
 });
 
-test("keeps https, data, and cid image URLs available to email fixtures", () => {
-  for (const url of ["https://example.com/a.png", "data:image/png;base64,AA==", "cid:hero-image"]) {
+test("keeps https and cid CSS image URLs available to email fixtures", () => {
+  for (const url of ["https://example.com/a.png", "cid:hero-image"]) {
     const value = stats();
     const result = __testing.processDeclarations(`background-image:url('${url}')`, value, false);
     assert.match(result, /background-image:url/);
@@ -82,9 +82,9 @@ test("ignores malformed declarations without corrupting valid neighbors", () => 
   assert.equal(result, "color:#ffffff;background:#212025");
 });
 
-test("keeps custom properties intact for email fallback chains", () => {
+test("strips custom properties and dependent declarations for Gmail", () => {
   const result = __testing.processDeclarations("--brand:#fff;color:var(--brand);padding:4px", stats(), true);
-  assert.equal(result, "--brand:#fff;color:var(--brand);padding:4px");
+  assert.equal(result, "padding:4px");
 });
 
 test("parses case-insensitive named colors and transparent tokens", () => {
@@ -109,12 +109,11 @@ test("produces finite valid colors across a deterministic RGB matrix", () => {
   }
 });
 
-test("handles declaration values containing semicolons inside data URLs", () => {
+test("strips CSS data URLs while preserving neighboring declarations", () => {
   const result = __testing.processDeclarations(
     "background-image:url('data:image/svg+xml;utf8,<svg></svg>');color:#000",
     stats(),
     false,
   );
-  assert.match(result, /data:image\/svg\+xml;utf8/);
-  assert.match(result, /;color:#000$/);
+  assert.equal(result, "color:#000");
 });

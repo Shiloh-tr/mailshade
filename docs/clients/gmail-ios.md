@@ -110,4 +110,6 @@ Raw local evidence is stored under the ignored `captures/2026-08-16T09-55-10-855
 - Coverage is limited to the documented fixtures and sampled points.
 - Remote raster/SVG image rewriting, blend modes, animated content, and every possible media-query construction are not yet exhaustively characterized.
 - No Gmail dark-mode typography auto-sizing was observed in the dedicated matrix. `-webkit-text-size-adjust` is stripped/ignored, while standard `font-size-adjust` remains accepted.
+- CSS custom properties are not retained: Gmail removes `--name` declarations and declarations that depend on `var()`, allowing ordinary cascade/inheritance fallbacks to take effect.
+- CSS `url(data:...)` declarations are removed. This is measured for CSS background images and is intentionally not generalized to ordinary `<img>` sources without a separate fixture.
 - The profile is a device-validated draft, not a claim of pixel-perfect equivalence across all Gmail iOS versions.

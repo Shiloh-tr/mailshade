@@ -39,6 +39,8 @@ export const gmailIosAdapter: ClientAdapter = {
   darkEyebrow: "DEVICE-VALIDATED DRAFT",
   downloadFilename: "gmail-ios-simulated.html",
   supportedProperties,
+  supportsCustomProperties: false,
+  supportsCssDataUrls: false,
   preserveGradients: true,
   profile: profileJson as unknown as ColorTransformProfile,
 };
