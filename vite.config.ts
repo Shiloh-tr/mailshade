@@ -44,6 +44,12 @@ export default defineConfig(async () => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
+    // The simulator runs these CommonJS CSS parsers in the browser. Vinext's
+    // client environment does not discover them early enough to convert their
+    // default exports, so prebundle them before serving the module graph.
+    optimizeDeps: {
+      include: ["postcss", "postcss-selector-parser", "postcss-value-parser"],
+    },
     server: isCodexSeatbeltSandbox
       ? { watch: { useFsEvents: false, usePolling: true } }
       : undefined,
