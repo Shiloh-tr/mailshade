@@ -17,6 +17,20 @@ export interface SimulationOptions {
   clientId?: string;
 }
 
+export interface SimulationStats {
+  strippedElements: number;
+  strippedAttributes: number;
+  strippedDeclarations: number;
+  transformedColors: number;
+  preservedDarkColors: number;
+  gradients: number;
+  remoteImages: number;
+  unresolvedCss: number;
+  securityRemovedElements: number;
+  securityRemovedAttributes: number;
+  securityRemovedDeclarations: number;
+}
+
 export interface SimulationResult {
   sourceHtml: string;
   originalPreviewHtml: string;
@@ -25,20 +39,11 @@ export interface SimulationResult {
   clientLightHtml: string;
   clientDarkHtml: string;
   diagnostics: Diagnostic[];
-  stats: {
-    strippedElements: number;
-    strippedAttributes: number;
-    strippedDeclarations: number;
-    transformedColors: number;
-    preservedDarkColors: number;
-    gradients: number;
-    remoteImages: number;
-    unresolvedCss: number;
-    securityRemovedElements: number;
-    securityRemovedAttributes: number;
-    securityRemovedDeclarations: number;
-  };
+  modeDiagnostics: Record<"original" | "light" | "dark", Diagnostic[]>;
+  stats: SimulationStats;
+  modeStats: Record<"original" | "light" | "dark", SimulationStats>;
   ruleApplications: RuleApplication[];
+  modeRuleApplications: Record<"original" | "light" | "dark", RuleApplication[]>;
   compatibility: {
     profileId: string;
     catalogCommit: string;
@@ -97,7 +102,7 @@ interface RGB {
   a: number;
 }
 
-type MutableStats = SimulationResult["stats"] & { ruleCounts?: Record<string, number> };
+type MutableStats = SimulationStats & { ruleCounts?: Record<string, number> };
 
 type ColorRole = "surface" | "text" | "border";
 
@@ -596,6 +601,23 @@ export function simulateEmail(input: string, options: SimulationOptions): Simula
     securityRemovedAttributes: originalStats.securityRemovedAttributes,
     securityRemovedDeclarations: Math.max(originalStats.securityRemovedDeclarations, lightStats.securityRemovedDeclarations, darkStats.securityRemovedDeclarations),
   };
+  const publicStats = (current: MutableStats): SimulationStats => ({
+    strippedElements: current.strippedElements,
+    strippedAttributes: current.strippedAttributes,
+    strippedDeclarations: current.strippedDeclarations,
+    transformedColors: current.transformedColors,
+    preservedDarkColors: current.preservedDarkColors,
+    gradients: current.gradients,
+    remoteImages: current.remoteImages,
+    unresolvedCss: current.unresolvedCss,
+    securityRemovedElements: current.securityRemovedElements,
+    securityRemovedAttributes: current.securityRemovedAttributes,
+    securityRemovedDeclarations: current.securityRemovedDeclarations,
+  });
+  const applicationsFor = (current: MutableStats): RuleApplication[] => adapter.compatibility.rules.flatMap((rule) => {
+    const count = current.ruleCounts?.[rule.id] ?? 0;
+    return count ? [{ ruleId: rule.id, featureId: rule.featureId, action: rule.action, count, evidence: rule.evidence, confidence: rule.confidence }] : [];
+  });
   const ruleCounts = new Map<string, number>();
   for (const current of [lightStats, darkStats]) {
     for (const [ruleId, count] of Object.entries(current.ruleCounts ?? {})) {
@@ -606,6 +628,7 @@ export function simulateEmail(input: string, options: SimulationOptions): Simula
     const count = ruleCounts.get(rule.id) ?? 0;
     return count ? [{ ruleId: rule.id, featureId: rule.featureId, action: rule.action, count, evidence: rule.evidence, confidence: rule.confidence }] : [];
   });
+  const modeRuleApplications = { original: [], light: applicationsFor(lightStats), dark: applicationsFor(darkStats) } satisfies SimulationResult["modeRuleApplications"];
   const diagnostics: Diagnostic[] = [
     {
       level: "info",
@@ -630,6 +653,15 @@ export function simulateEmail(input: string, options: SimulationOptions): Simula
       ? `This profile passed its paired ${adapter.label} ${adapter.platform} capture and v0.1 holdout gates. Broader client-build coverage remains ongoing.`
       : `This measured draft uses paired ${adapter.label} ${adapter.platform} captures but remains unverified until its holdouts pass.`,
   });
+  const calibrationDiagnostic = diagnostics.at(-1)!;
+  const remoteDiagnostic = stats.remoteImages ? diagnostics.find((diagnostic) => diagnostic.title === "Remote assets") : undefined;
+  const securityDiagnostic = securityChanges ? diagnostics.find((diagnostic) => diagnostic.title === "Preview security envelope") : undefined;
+  const unresolvedDiagnostic = stats.unresolvedCss ? diagnostics.find((diagnostic) => diagnostic.title === "Unresolved CSS") : undefined;
+  const modeDiagnostics: SimulationResult["modeDiagnostics"] = {
+    original: [securityDiagnostic, remoteDiagnostic].filter((item): item is Diagnostic => Boolean(item)),
+    light: [diagnostics[0], unresolvedDiagnostic, securityDiagnostic, remoteDiagnostic, calibrationDiagnostic].filter((item): item is Diagnostic => Boolean(item)),
+    dark: diagnostics,
+  };
 
   return {
     sourceHtml: input,
@@ -638,8 +670,11 @@ export function simulateEmail(input: string, options: SimulationOptions): Simula
     clientLightHtml,
     clientDarkHtml,
     diagnostics,
-    stats,
+    modeDiagnostics,
+    stats: publicStats(stats),
+    modeStats: { original: publicStats(originalStats), light: publicStats(lightStats), dark: publicStats(darkStats) },
     ruleApplications,
+    modeRuleApplications,
     compatibility: { profileId: adapter.compatibility.id, catalogCommit: adapter.compatibility.catalog.commit, target: adapter.compatibility.target },
     profile: { id: adapter.profile.id, label: adapter.profile.label, status: adapter.profile.status },
     client: { id: adapter.id, label: adapter.label, platform: adapter.platform, target: adapter.compatibility.target },

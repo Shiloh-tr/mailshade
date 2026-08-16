@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mailshade Compatibility"
+  short_description: "Query and compare email client support"
+  default_prompt: "Use $mailshade-compatibility to compare support for this email feature across Gmail iOS and Outlook Windows."

@@ -46,6 +46,7 @@ export interface CatalogObservation {
 export interface MeasuredObservation {
   id: string;
   featureId: string;
+  catalogFeatureIds?: string[];
   domain: RuleDomain;
   matcher?: RuleMatcher;
   action: RuleAction;

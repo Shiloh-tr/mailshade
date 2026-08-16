@@ -1,6 +1,6 @@
 # Mailshade
 
-Mailshade is an open-source, local-first Gmail iOS dark-mode simulator. Paste email HTML to compare the original, a Gmail-compatible light pass, and a transparent working dark-mode profile.
+Mailshade is an open-source, local-first email compatibility project. It combines a pinned cross-client evidence catalog with executable, measured preview adapters. Gmail iOS is currently the only executable adapter.
 
 ## Run locally
 
@@ -13,13 +13,27 @@ Open `http://localhost:3000`.
 
 ## Agent and CLI previews
 
-Codex and Claude can use the project-local `mailshade-preview` skill to render an HTML email by registered client and mode. The same workflow is available directly:
+ChatGPT, Codex, Claude, and other hosts that support the Agent Skills convention can use the canonical skills in `.agents/skills`. `mailshade-preview` renders HTML through registered executable adapters:
 
 ```bash
 npm run preview -- --input path/to/email.html --client gmail-ios --mode dark
 ```
 
 The command writes transformed HTML, a 390px headless Chrome PNG, and `manifest.json` under `outputs/previews/`. Use `--mode all` or `--client all` for comparisons, `--viewport <pixels>` for another width, and `--block-remote-images` to prevent requests to image and tracking URLs. Chrome stays headless and does not open a visible browser window.
+
+`--client all` means every executable adapter. It currently means Gmail iOS only. A saved catalog target such as Outlook Windows is queryable but cannot be rendered or silently substituted.
+
+## Cross-client compatibility lookup
+
+The Node-only catalog contains 308 Can I Email features across 21 clients and 48 client/platform combinations. Query the latest catalog observation or an exact saved version:
+
+```bash
+npm run compatibility:query -- --client outlook --platform windows --feature css-variables
+npm run compatibility:query -- --client apple-mail --platform ios --version 12.1 --feature css-background-image
+npm run compatibility:query -- --compare gmail/ios,apple-mail/ios,outlook/windows --feature css-variables
+```
+
+Catalog results are evidence, not executable transformations. They retain raw tokens, notes, history, and source URLs. Gmail iOS results additionally identify the executable profile and measured local overrides. The `mailshade-compatibility` skill provides the same lookup and comparison workflow to Agent Skills hosts.
 
 ## SMTP authentication
 
@@ -41,7 +55,7 @@ Transformation coefficients live in versioned JSON profiles under `profiles/gmai
 
 ## Adding clients
 
-The shared renderer is client-neutral. Registered adapters under `app/core/clients/` provide each client's CSS policy, gradient behavior, display metadata, download filename, and versioned color profile. The UI client selector, three previews, diagnostics, and exports all read from that registry. See [Adding an email client](docs/clients/adding-a-client.md); unknown client IDs fail explicitly instead of silently using Gmail rules.
+The shared renderer is client-neutral. Registered adapters under `app/core/clients/` provide curated executable mappings, measured overrides, exact test context, display metadata, and a versioned dark-mode profile. The UI, previews, diagnostics, and exports read from that registry. See [Adding an email client](docs/clients/adding-a-client.md); unknown and catalog-only client IDs fail explicitly instead of silently using Gmail rules.
 
 ## License
 

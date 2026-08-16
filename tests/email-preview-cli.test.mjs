@@ -4,7 +4,9 @@ import {
   artifactBasename,
   chromeCandidates,
   htmlForMode,
+  manifestArtifact,
   parsePreviewArgs,
+  resolvePreviewClientIds,
   selectModes,
 } from "../scripts/email-preview-lib.mjs";
 
@@ -19,6 +21,13 @@ test("parses preview dimensions and loads remote images by default", () => {
     chromeExecutable: null,
     help: false,
   });
+});
+
+test("defines all as executable adapters and rejects catalog-only rendering", () => {
+  const clients = [{ id: "gmail-ios" }];
+  assert.deepEqual(resolvePreviewClientIds("all", clients, ["gmail/ios", "outlook/windows"]), ["gmail-ios"]);
+  assert.throws(() => resolvePreviewClientIds("outlook/windows", clients, ["gmail/ios", "outlook/windows"]), /Catalog-only target/);
+  assert.throws(() => resolvePreviewClientIds("imaginary", clients, []), /Unknown client/);
 });
 
 test("supports stdin, all comparisons, and the remote-image privacy switch", () => {
@@ -44,4 +53,23 @@ test("maps simulation results and creates stable artifact names", () => {
 
 test("prefers an explicitly configured Chrome path", () => {
   assert.equal(chromeCandidates("linux", { MAILSHADE_CHROME_PATH: "/custom/chrome" })[0], "/custom/chrome");
+});
+
+test("builds mode-specific manifests with exact compatibility evidence", () => {
+  const zero = { strippedElements: 0, strippedAttributes: 0, strippedDeclarations: 0, transformedColors: 0, preservedDarkColors: 0, gradients: 0, remoteImages: 0, unresolvedCss: 0, securityRemovedElements: 0, securityRemovedAttributes: 0, securityRemovedDeclarations: 0 };
+  const result = {
+    client: { id: "gmail-ios", target: { appVersion: "6.0.260803" } },
+    profile: { id: "profile", status: "validated-draft" },
+    compatibility: { profileId: "compat", catalogCommit: "abc", target: { appVersion: "6.0.260803" } },
+    ruleApplications: [{ ruleId: "measured", evidence: "measured" }, { ruleId: "catalog", evidence: "catalog" }],
+    modeRuleApplications: { original: [], light: [], dark: [{ ruleId: "measured", evidence: "measured" }, { ruleId: "catalog", evidence: "catalog" }] },
+    modeStats: { original: zero, light: { ...zero, strippedDeclarations: 2 }, dark: { ...zero, transformedColors: 3 } },
+    diagnostics: [],
+    modeDiagnostics: { original: [], light: [], dark: [{ title: "dark" }] },
+  };
+  const artifact = manifestArtifact(result, "dark", "/tmp/mail.html", "/tmp/mail.png");
+  assert.equal(artifact.stats.transformedColors, 3);
+  assert.deepEqual(artifact.compatibility.appliedMeasuredOverrides.map((rule) => rule.ruleId), ["measured"]);
+  assert.equal(artifact.compatibility.catalogCommit, "abc");
+  assert.equal(artifact.diagnostics[0].title, "dark");
 });

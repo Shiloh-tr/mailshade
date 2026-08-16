@@ -24,6 +24,8 @@
     "captures:geometry": "node scripts/validate-geometry.mjs",
     "compatibility:sync": "node scripts/sync-compatibility-catalog.mjs",
     "compatibility:query": "node scripts/query-compatibility.mjs",
+    "compatibility:audit": "node scripts/audit-compatibility.mjs",
+    "skills:validate": "node scripts/validate-skills.mjs",
     "verification:audit": "node scripts/audit-verification.mjs"
   },
   "dependencies": {

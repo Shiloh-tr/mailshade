@@ -1,6 +1,6 @@
 import path from "node:path";
 import process from "node:process";
-import { loadCatalog } from "./compatibility-catalog-lib.mjs";
+import { parseTarget, runCompatibilityQuery } from "./compatibility-query-lib.mjs";
 
 function valueAfter(args, flag) {
   const index = args.indexOf(flag);
@@ -14,64 +14,39 @@ function fail(message) {
 
 const args = process.argv.slice(2);
 if (args.includes("--help")) {
-  console.log("Usage: npm run compatibility:query -- --client <id> --platform <id> [--version <exact>] [--feature <id>] [--status <status>] [--history] [--json]");
+  console.log("Usage:\n  npm run compatibility:query -- --client <id> --platform <id> [--version <exact>] [--feature <id>] [--status <status>] [--history] [--json]\n  npm run compatibility:query -- --compare <client/platform,...> [--feature <id>] [--status <status>] [--history] [--json]");
   process.exit(0);
 }
 
+const compare = valueAfter(args, "--compare");
 const client = valueAfter(args, "--client");
 const platform = valueAfter(args, "--platform");
 const version = valueAfter(args, "--version");
-const featureId = valueAfter(args, "--feature");
-const status = valueAfter(args, "--status");
-const history = args.includes("--history");
-const json = args.includes("--json");
-if (!client || !platform) fail("Both --client and --platform are required. Use --help for examples.");
+if (compare && (client || platform)) fail("Use either --compare or --client with --platform, not both.");
+if (compare && version) fail("--version is only valid for one exact client/platform target; catalog versions are not comparable across clients.");
+if (!compare && (!client || !platform)) fail("Both --client and --platform are required unless --compare is used.");
 
-const repositoryRoot = path.resolve(import.meta.dirname, "..");
-const catalog = loadCatalog(repositoryRoot);
-if (!catalog.clientIds.includes(client)) fail(`Unknown client '${client}'. Valid clients: ${catalog.clientIds.join(", ")}`);
-if (!catalog.clientPlatforms.includes(`${client}/${platform}`)) {
-  const platforms = catalog.clientPlatforms.filter((entry) => entry.startsWith(`${client}/`)).map((entry) => entry.split("/")[1]);
-  fail(`Unknown platform '${platform}' for ${client}. Valid platforms: ${platforms.join(", ")}`);
-}
-
-const matches = [];
-for (const feature of catalog.features) {
-  if (featureId && feature.id !== featureId) continue;
-  const observations = feature.clients?.[client]?.[platform] ?? [];
-  if (!observations.length) continue;
-  const selected = version ? observations.find((observation) => observation.version === version) : observations.at(-1);
-  if (!selected || (status && selected.status !== status)) continue;
-  matches.push({
-    feature: feature.id,
-    title: feature.title,
-    category: feature.category,
-    lastTestDate: feature.lastTestDate,
-    sourceUrl: feature.sourceUrl,
-    observation: selected,
-    observationLabel: version ? `exact catalog observation ${version}` : "latest catalog observation",
-    history: history ? observations : undefined,
-    referencedNotes: selected.noteReferences.map((reference) => ({ reference, text: feature.notesByNumber?.[reference] ?? null })),
+try {
+  const targets = compare ? compare.split(",").map(parseTarget) : [{ client, platform }];
+  const result = runCompatibilityQuery(path.resolve(import.meta.dirname, ".."), {
+    targets,
+    version,
+    featureId: valueAfter(args, "--feature"),
+    status: valueAfter(args, "--status"),
+    history: args.includes("--history"),
   });
-}
-
-if (featureId && !catalog.features.some((feature) => feature.id === featureId)) fail(`Unknown feature '${featureId}'.`);
-if (version && !matches.length) fail(`No exact ${client}/${platform} observation found for version '${version}'${featureId ? ` and feature '${featureId}'` : ""}.`);
-
-const result = {
-  target: { client, platform, version: version ?? null },
-  catalog: { commit: catalog.source.commit, importedAt: catalog.source.importedAt },
-  count: matches.length,
-  matches,
-};
-
-if (json) {
-  console.log(JSON.stringify(result, null, 2));
-} else {
-  console.log(`${client}/${platform} · ${matches.length} matching features · catalog ${catalog.source.commit.slice(0, 12)}`);
-  for (const match of matches) {
-    console.log(`${match.feature}\t${match.observation.status}\t${match.observation.version}\t${match.observation.result}\t${match.title}`);
-    for (const note of match.referencedNotes) console.log(`  #${note.reference}: ${note.text ?? "Missing note text"}`);
+  if (args.includes("--json")) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    for (const target of result.targets) {
+      console.log(`${target.target.client}/${target.target.platform} · ${target.capability} · ${target.count} matching features · catalog ${result.catalog.commit.slice(0, 12)}`);
+      for (const match of target.matches) {
+        console.log(`${match.feature}\t${match.effectiveStatus}\t${match.observation.version}\t${match.observation.result}\t${match.title}`);
+        for (const note of match.referencedNotes) console.log(`  #${note.reference}: ${note.text ?? "Missing note text"}`);
+        for (const rule of match.executable?.rules ?? []) console.log(`  local ${rule.evidence}: ${rule.id} → ${rule.action}`);
+      }
+    }
   }
+} catch (error) {
+  fail(error.message);
 }
-

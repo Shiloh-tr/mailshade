@@ -9,10 +9,13 @@ import {
   artifactBasename,
   findChromeExecutable,
   htmlForMode,
+  manifestArtifact,
   parsePreviewArgs,
+  resolvePreviewClientIds,
   safeStem,
   selectModes,
 } from "./email-preview-lib.mjs";
+import { loadCatalog } from "./compatibility-catalog-lib.mjs";
 
 globalThis.DOMParser = DOMParser;
 globalThis.HTMLImageElement = HTMLImageElement;
@@ -61,14 +64,13 @@ async function main() {
     return;
   }
 
-  const clientIds = options.client === "all" ? CLIENTS.map(({ id }) => id) : [options.client ?? DEFAULT_CLIENT_ID];
-  const knownIds = new Set(CLIENTS.map(({ id }) => id));
-  for (const clientId of clientIds) {
-    if (!knownIds.has(clientId)) {
-      console.error(`Error: unknown client '${clientId}'. Registered clients: ${[...knownIds].join(", ")}`);
-      process.exitCode = 2;
-      return;
-    }
+  let clientIds;
+  try {
+    clientIds = resolvePreviewClientIds(options.client ?? DEFAULT_CLIENT_ID, CLIENTS, loadCatalog(path.resolve(import.meta.dirname, "..")).clientPlatforms);
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    process.exitCode = 2;
+    return;
   }
 
   const inputHtml = await readInput(options.input);
@@ -112,15 +114,8 @@ async function main() {
     source: options.input === "-" ? "stdin" : path.resolve(options.input),
     viewport: options.viewport,
     loadRemoteImages: options.loadRemoteImages,
-    artifacts: jobs.map((job) => ({
-      client: job.result.client,
-      profile: job.result.profile,
-      mode: job.mode,
-      html: path.basename(job.htmlPath),
-      png: path.basename(job.pngPath),
-      stats: job.result.stats,
-      diagnostics: job.result.diagnostics,
-    })),
+    remoteImagePolicy: options.loadRemoteImages ? "load" : "block",
+    artifacts: jobs.map((job) => manifestArtifact(job.result, job.mode, job.htmlPath, job.pngPath)),
   };
   const manifestPath = path.join(outputDirectory, "manifest.json");
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
