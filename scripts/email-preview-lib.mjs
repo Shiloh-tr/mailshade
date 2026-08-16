@@ -65,7 +65,8 @@ export function resolvePreviewClientIds(requested, clients, catalogTargets = [])
   if (requested === "all") return clients.map(({ id }) => id);
   const clientId = requested ?? clients[0]?.id;
   if (clients.some(({ id }) => id === clientId)) return [clientId];
-  if (catalogTargets.includes(clientId)) throw new Error(`Catalog-only target '${clientId}' has no executable adapter. Use npm run compatibility:query instead.`);
+  const catalogTarget = catalogTargets.find((target) => target === clientId || target.replace("/", "-") === clientId);
+  if (catalogTarget) throw new Error(`Catalog-only target '${clientId}' has no executable adapter. Use npm run compatibility:query instead.`);
   throw new Error(`Unknown client '${clientId}'. Registered executable clients: ${clients.map(({ id }) => id).join(", ")}`);
 }
 

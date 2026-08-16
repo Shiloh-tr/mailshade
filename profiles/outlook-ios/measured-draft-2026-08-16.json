@@ -1,0 +1,288 @@
+{
+  "id": "outlook-ios-measured-draft-2026-08-16",
+  "label": "Outlook iOS · measured draft",
+  "status": "measured-draft",
+  "surface": {
+    "preserveBelowLuminance": 0.260922,
+    "target": "#150000",
+    "lightMix": 0.92,
+    "midMix": 0.62,
+    "lightThreshold": 0.698402
+  },
+  "text": {
+    "preserveAboveLuminance": 0.130906,
+    "target": "#fff2ff",
+    "darkMix": 0.96,
+    "midMix": 0.44,
+    "darkThreshold": 0.053032
+  },
+  "border": {
+    "darkThreshold": 0.043938,
+    "darkTarget": "#121212",
+    "darkMix": 0.04,
+    "lightTarget": "#b289b7",
+    "lightMix": 0.04,
+    "midMix": 0.04,
+    "lightThreshold": 0.091345
+  },
+  "calibration": {
+    "generatedAt": "2026-08-16T21:03:29.321Z",
+    "method": "anchor-residual-v1",
+    "baselineRadius": 96,
+    "anchors": {
+      "surface": [
+        {
+          "source": "#ffffff",
+          "target": "#141414",
+          "id": "color-matrix/white-black"
+        },
+        {
+          "source": "#f2f2f2",
+          "target": "#1c1c1c",
+          "id": "color-matrix/pale-charcoal"
+        },
+        {
+          "source": "#bdbdbd",
+          "target": "#3f3f40",
+          "id": "color-matrix/mid-gray"
+        },
+        {
+          "source": "#777777",
+          "target": "#787778",
+          "id": "color-matrix/gray-white"
+        },
+        {
+          "source": "#111111",
+          "target": "#111111",
+          "id": "color-matrix/black-white"
+        },
+        {
+          "source": "#080a0f",
+          "target": "#4c4d52",
+          "id": "color-matrix/dark-blue"
+        },
+        {
+          "source": "#5b2cff",
+          "target": "#3c14e8",
+          "id": "color-matrix/purple"
+        },
+        {
+          "source": "#ff7246",
+          "target": "#981602",
+          "id": "color-matrix/orange"
+        },
+        {
+          "source": "#111620",
+          "target": "#4a4c59",
+          "id": "dark-native-holdout/unseen-dark-surface"
+        }
+      ],
+      "surfaceWithDarkText": [
+        {
+          "source": "#ffffff",
+          "target": "#141414",
+          "id": "color-matrix/white-black"
+        },
+        {
+          "source": "#f2f2f2",
+          "target": "#1c1c1c",
+          "id": "color-matrix/pale-charcoal"
+        },
+        {
+          "source": "#bdbdbd",
+          "target": "#3f3f40",
+          "id": "color-matrix/mid-gray"
+        },
+        {
+          "source": "#ff7246",
+          "target": "#981602",
+          "id": "color-matrix/orange"
+        }
+      ],
+      "surfaceWithLightText": [
+        {
+          "source": "#777777",
+          "target": "#787778",
+          "id": "color-matrix/gray-white"
+        },
+        {
+          "source": "#111111",
+          "target": "#111111",
+          "id": "color-matrix/black-white"
+        },
+        {
+          "source": "#080a0f",
+          "target": "#4c4d52",
+          "id": "color-matrix/dark-blue"
+        },
+        {
+          "source": "#5b2cff",
+          "target": "#3c14e8",
+          "id": "color-matrix/purple"
+        },
+        {
+          "source": "#111620",
+          "target": "#4a4c59",
+          "id": "dark-native-holdout/unseen-dark-surface"
+        }
+      ],
+      "text": [
+        {
+          "source": "#000000",
+          "target": "#ffffff",
+          "id": "role-matrix/text-black"
+        },
+        {
+          "source": "#202124",
+          "target": "#dfdee3",
+          "id": "role-matrix/text-charcoal"
+        },
+        {
+          "source": "#555555",
+          "target": "#a7a7a7",
+          "id": "role-matrix/text-mid"
+        },
+        {
+          "source": "#777777",
+          "target": "#878787",
+          "id": "role-matrix/text-gray"
+        },
+        {
+          "source": "#ffffff",
+          "target": "#ffffff",
+          "id": "role-matrix/text-white"
+        },
+        {
+          "source": "#c7d0df",
+          "target": "#c8cfe1",
+          "id": "role-matrix/text-pale"
+        },
+        {
+          "source": "#5b2cff",
+          "target": "#b071ff",
+          "id": "role-matrix/text-purple"
+        },
+        {
+          "source": "#ff7246",
+          "target": "#ff7247",
+          "id": "role-matrix/text-orange"
+        },
+        {
+          "source": "#f4f6fb",
+          "target": "#f9f9fb",
+          "id": "dark-native-holdout/hero-text"
+        },
+        {
+          "source": "#aba0d8",
+          "target": "#476753",
+          "id": "chromatic-role-holdout/green-light"
+        },
+        {
+          "source": "#797d87",
+          "target": "#64867f",
+          "id": "chromatic-role-holdout/green-dark"
+        },
+        {
+          "source": "#b6a8e2",
+          "target": "#58488d",
+          "id": "chromatic-role-holdout/purple-light"
+        },
+        {
+          "source": "#6a6b78",
+          "target": "#7d6cbe",
+          "id": "chromatic-role-holdout/purple-dark"
+        },
+        {
+          "source": "#b1c6d8",
+          "target": "#4b6582",
+          "id": "chromatic-role-holdout/teal-light"
+        },
+        {
+          "source": "#fef4c5",
+          "target": "#a668b1",
+          "id": "chromatic-role-holdout/magenta-dark"
+        }
+      ],
+      "border": [
+        {
+          "source": "#000000",
+          "target": "#000000",
+          "id": "role-matrix/border-black"
+        },
+        {
+          "source": "#242424",
+          "target": "#242424",
+          "id": "role-matrix/border-charcoal"
+        },
+        {
+          "source": "#777777",
+          "target": "#787878",
+          "id": "role-matrix/border-gray"
+        },
+        {
+          "source": "#bdbdbd",
+          "target": "#bdbdbd",
+          "id": "role-matrix/border-light"
+        },
+        {
+          "source": "#ffffff",
+          "target": "#ffffff",
+          "id": "role-matrix/border-white"
+        },
+        {
+          "source": "#5b2cff",
+          "target": "#5b2efe",
+          "id": "role-matrix/border-purple"
+        },
+        {
+          "source": "#ff7246",
+          "target": "#ff7248",
+          "id": "role-matrix/border-orange"
+        },
+        {
+          "source": "#3b4b6b",
+          "target": "#3e496d",
+          "id": "role-matrix/border-bluegray"
+        }
+      ]
+    },
+    "sourceAnalyses": [
+      "captures/2026-08-16T20-23-37-899Z/outlook-ios/color-matrix-fit-analysis.json",
+      "captures/2026-08-16T20-23-37-899Z/outlook-ios/role-matrix-fit-analysis.json",
+      "captures/2026-08-16T20-23-37-899Z/outlook-ios/dark-native-holdout-validation-analysis.json",
+      "captures/2026-08-16T20-23-37-899Z/outlook-ios/chromatic-role-holdout-analysis.json"
+    ],
+    "fits": {
+      "surface": {
+        "rmseRgb": 32.8745,
+        "observationCount": 9
+      },
+      "text": {
+        "rmseRgb": 51.7152,
+        "observationCount": 15
+      },
+      "border": {
+        "rmseRgb": 2.1568,
+        "observationCount": 8
+      }
+    },
+    "inSampleValidation": {
+      "surface": {
+        "metric": "CIE76",
+        "median": 0,
+        "p95": 0
+      },
+      "text": {
+        "metric": "CIE76",
+        "median": 0,
+        "p95": 0
+      },
+      "border": {
+        "metric": "CIE76",
+        "median": 0,
+        "p95": 0
+      }
+    },
+    "note": "Anchors reproduce measured regions; residual interpolation handles unseen colors. Validate every role against gradients and naturally dark holdouts before activation."
+  }
+}

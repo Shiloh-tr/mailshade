@@ -56,6 +56,12 @@
       "description": "Gmail iOS typography auto-sizing across text-size-adjust, font sizes, wrapping, fixed widths, nowrap, and long tokens"
     },
     {
+      "id": "outlook-dark-mode-matrix",
+      "file": "outlook-dark-mode-matrix.html",
+      "category": "instrumented",
+      "description": "Outlook iOS color-scheme media queries, injected data attributes, selector forms, variables, and gradient fallbacks"
+    },
+    {
       "id": "chromatic-role-holdout",
       "file": "chromatic-role-holdout.html",
       "category": "holdout",
@@ -72,6 +78,12 @@
       "file": "legacy-inheritance-holdout.html",
       "category": "holdout",
       "description": "Independent inheritance, legacy attributes, important cascade, transparency, and opacity cases"
+    },
+    {
+      "id": "gmail-image-background-regression",
+      "file": "gmail-image-background-regression.html",
+      "category": "regression",
+      "description": "Gmail iOS remote image backgrounds whose URLs contain CSS color names, with dark fallback surfaces"
     }
   ]
 }

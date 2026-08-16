@@ -1,0 +1,39 @@
+{
+  "client": "Outlook",
+  "platform": "iOS",
+  "device": "iPhone 15",
+  "osVersion": "26.6",
+  "clientVersion": "5.2630.0",
+  "accountType": "Microsoft 365",
+  "captureRunId": "2026-08-16T20-23-37-899Z",
+  "deviceScreenshot": { "width": 318, "height": 701 },
+  "status": "failed",
+  "activeProfile": null,
+  "candidateProfile": "profiles/outlook-ios/measured-draft-2026-08-16.json",
+  "gates": {
+    "identity": { "status": "pass", "evidence": "Installed Outlook version, iOS version, device, account type, viewport, and explicit Outlook Light/Dark appearances recorded" },
+    "anchorRegression": { "status": "pass", "evidence": "Measured anchors reproduce fitting observations" },
+    "chromaticHoldoutColor": {
+      "status": "fail",
+      "analysis": "captures/2026-08-16T20-23-37-899Z/outlook-ios/chromatic-role-holdout-analysis.json",
+      "observationCount": 6,
+      "medianDeltaE00": 34.8721,
+      "p95DeltaE00": 42.0335,
+      "thresholds": { "medianDeltaE00": 2, "p95DeltaE00": 5 }
+    },
+    "legacyInheritanceHoldoutColor": {
+      "status": "fail",
+      "analysis": "captures/2026-08-16T20-23-37-899Z/outlook-ios/legacy-inheritance-holdout-analysis.json",
+      "surfaceWithDarkText": { "medianDeltaE00": 21.2715, "p95DeltaE00": 21.2715 },
+      "surfaceWithLightText": { "medianDeltaE00": 31.8918, "p95DeltaE00": 32.4434 },
+      "thresholds": { "medianDeltaE00": 2, "p95DeltaE00": 5 }
+    },
+    "geometry": {
+      "status": "pass",
+      "thresholdPixels": 2,
+      "maximumDeltaPixels": 0,
+      "evidence": "captures/2026-08-16T20-23-37-899Z/outlook-ios/legacy-inheritance-holdout-geometry.json"
+    },
+    "registration": { "status": "blocked", "reason": "Color holdout gates failed; Outlook iOS remains catalog-only" }
+  }
+}

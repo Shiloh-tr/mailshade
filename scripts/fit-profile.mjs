@@ -11,11 +11,13 @@ function argumentsFor(name) {
 }
 
 const inputs = argumentsFor("--analysis");
-const basePath = argumentsFor("--base")[0] ?? "profiles/gmail-ios/heuristic-v0.json";
-const outputPath = argumentsFor("--output")[0] ?? "captures/gmail-ios-measured-draft.json";
+const clientId = argumentsFor("--client-id")[0] ?? "gmail-ios";
+const clientLabel = argumentsFor("--client-label")[0] ?? (clientId === "gmail-ios" ? "Gmail iOS" : clientId);
+const basePath = argumentsFor("--base")[0] ?? `profiles/${clientId}/heuristic-v0.json`;
+const outputPath = argumentsFor("--output")[0] ?? `captures/${clientId}-measured-draft.json`;
 
 if (!inputs.length) {
-  throw new Error("Usage: npm run captures:fit -- --analysis captures/result.json [--analysis ...] [--base profile.json] [--output candidate.json]");
+  throw new Error("Usage: npm run captures:fit -- --analysis captures/result.json [--analysis ...] [--client-id gmail-ios] [--client-label 'Gmail iOS'] [--base profile.json] [--output candidate.json]");
 }
 
 const base = JSON.parse(await readFile(basePath, "utf8"));
@@ -63,8 +65,8 @@ const validations = {
 };
 const candidate = {
   ...base,
-  id: `gmail-ios-measured-draft-${new Date().toISOString().slice(0, 10)}`,
-  label: "Gmail iOS · measured draft",
+  id: `${clientId}-measured-draft-${new Date().toISOString().slice(0, 10)}`,
+  label: `${clientLabel} · measured draft`,
   status: "measured-draft",
   surface,
   text,
@@ -72,6 +74,7 @@ const candidate = {
   calibration: {
     generatedAt: new Date().toISOString(),
     method: "anchor-residual-v1",
+    ...(base.calibration?.baselineRadius ? { baselineRadius: base.calibration.baselineRadius } : {}),
     anchors,
     sourceAnalyses: analyses.map(({ path }) => path),
     fits: {

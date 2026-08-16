@@ -223,7 +223,7 @@ function baselineInvert(color: RGB, surfaceContext?: "dark" | "light") {
   return hslToRgb(value.h, value.s * 70, (0.13 + 0.87 * (1 - value.l)) * 100, color.a);
 }
 
-function anchorTransform(color: RGB, anchors: ColorAnchor[], surfaceContext?: "dark" | "light") {
+function anchorTransform(color: RGB, anchors: ColorAnchor[], surfaceContext?: "dark" | "light", baselineRadius?: number) {
   const parsed = anchors.map((anchor) => ({ source: parseColor(anchor.source)!, target: parseColor(anchor.target)! }));
   const exact = parsed.find((anchor) => ["r", "g", "b"].every((channel) => Math.abs(anchor.source[channel as "r" | "g" | "b"] - color[channel as "r" | "g" | "b"]) <= 2));
   if (exact) return { ...exact.target, a: color.a };
@@ -237,7 +237,8 @@ function anchorTransform(color: RGB, anchors: ColorAnchor[], surfaceContext?: "d
     .slice(0, Math.min(4, parsed.length));
   const result = { ...baseline };
   for (const channel of ["r", "g", "b"] as const) {
-    const baselineWeight = 1 / ((surfaceContext ? 6 : 96) ** 2);
+    const radius = baselineRadius ?? (surfaceContext ? 6 : 96);
+    const baselineWeight = 1 / (radius ** 2);
     let total = baseline[channel] * baselineWeight;
     let weights = baselineWeight;
     for (const anchor of nearest) {
@@ -269,7 +270,7 @@ function transformColor(
   const surfaceContext = role === "surface" && contextText ? (luminance(contextText) < 0.5 ? "dark" : "light") : undefined;
   const anchorKey = surfaceContext === "dark" ? "surfaceWithDarkText" : surfaceContext === "light" ? "surfaceWithLightText" : role;
   const anchors = profile.calibration?.method === "anchor-residual-v1" ? profile.calibration.anchors?.[anchorKey] : undefined;
-  if (anchors?.length) return anchorTransform(color, anchors, surfaceContext);
+  if (anchors?.length) return anchorTransform(color, anchors, surfaceContext, profile.calibration?.baselineRadius);
   const lightness = luminance(color);
   if (role === "surface") {
     if (lightness <= profile.surface.preserveBelowLuminance) {
@@ -303,7 +304,17 @@ function transformColorTokens(
   contextText?: RGB,
   profile: ColorTransformProfile = getClientAdapter(DEFAULT_CLIENT_ID).profile,
 ) {
-  return value.replace(COLOR_TOKEN, (token) => {
+  const protectedUrls: string[] = [];
+  const parsedValue = valueParser(value);
+  parsedValue.walk((node) => {
+    if (node.type !== "function" || node.value.toLowerCase() !== "url") return;
+    const index = protectedUrls.push(valueParser.stringify(node)) - 1;
+    node.type = "word";
+    node.value = `__mailshade_url_${index}__`;
+    delete node.nodes;
+    return false;
+  });
+  const transformed = parsedValue.toString().replace(COLOR_TOKEN, (token) => {
     const parsed = parseColor(token);
     if (!parsed || parsed.a === 0) return token;
     const transformed = transformColor(parsed, role, stats, contextText, profile);
@@ -311,6 +322,7 @@ function transformColorTokens(
     if (result.toLowerCase() !== token.toLowerCase()) stats.transformedColors += 1;
     return result;
   });
+  return transformed.replace(/__mailshade_url_(\d+)__/g, (_, index) => protectedUrls[Number(index)] ?? "");
 }
 
 function recordRule(stats: MutableStats, rule: EffectiveRule | undefined, count = 1) {

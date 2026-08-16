@@ -28,12 +28,20 @@ test("queries exact versions for other client families", () => {
 });
 
 test("compares executable and catalog-only targets without version inference", () => {
-  const result = query("--compare", "gmail/ios,apple-mail/ios,outlook/windows", "--feature", "css-variables", "--json");
+  const result = query("--compare", "gmail/ios,outlook/ios,outlook/windows", "--feature", "css-variables", "--json");
   assert.equal(result.status, 0, result.stderr);
   const output = JSON.parse(result.stdout);
   assert.equal(output.comparison, true);
   assert.deepEqual(output.targets.map((target) => target.capability), ["executable", "catalog-only", "catalog-only"]);
   assert.ok(output.targets.every((target) => target.matches[0].observationLabel === "latest catalog observation"));
+});
+
+test("keeps the measured Outlook iOS candidate catalog-only after failed device gates", () => {
+  const result = query("--client", "outlook", "--platform", "ios", "--feature", "css-variables", "--json");
+  assert.equal(result.status, 0, result.stderr);
+  const target = JSON.parse(result.stdout).targets[0];
+  assert.equal(target.capability, "catalog-only");
+  assert.equal(target.executableProfile, null);
 });
 
 test("rejects cross-client version matching", () => {

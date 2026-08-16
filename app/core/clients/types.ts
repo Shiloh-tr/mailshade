@@ -111,6 +111,7 @@ export interface ColorTransformProfile {
   };
   calibration?: {
     method?: string;
+    baselineRadius?: number;
     anchors?: Record<string, ColorAnchor[]>;
   };
 }

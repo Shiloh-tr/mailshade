@@ -25,7 +25,8 @@ test("parses preview dimensions and loads remote images by default", () => {
 
 test("defines all as executable adapters and rejects catalog-only rendering", () => {
   const clients = [{ id: "gmail-ios" }];
-  assert.deepEqual(resolvePreviewClientIds("all", clients, ["gmail/ios", "outlook/windows"]), ["gmail-ios"]);
+  assert.deepEqual(resolvePreviewClientIds("all", clients, ["gmail/ios", "outlook/ios", "outlook/windows"]), ["gmail-ios"]);
+  assert.throws(() => resolvePreviewClientIds("outlook-ios", clients, ["gmail/ios", "outlook/ios", "outlook/windows"]), /Catalog-only target/);
   assert.throws(() => resolvePreviewClientIds("outlook/windows", clients, ["gmail/ios", "outlook/windows"]), /Catalog-only target/);
   assert.throws(() => resolvePreviewClientIds("imaginary", clients, []), /Unknown client/);
 });
