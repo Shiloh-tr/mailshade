@@ -22,6 +22,8 @@
     "captures:validate": "node scripts/validate-profile.mjs",
     "captures:visual": "node scripts/validate-visual.mjs",
     "captures:geometry": "node scripts/validate-geometry.mjs",
+    "compatibility:sync": "node scripts/sync-compatibility-catalog.mjs",
+    "compatibility:query": "node scripts/query-compatibility.mjs",
     "verification:audit": "node scripts/audit-verification.mjs"
   },
   "dependencies": {
@@ -54,7 +56,8 @@
     "typescript-eslint": "8.59.3",
     "vinext": "1.0.0-beta.2",
     "vite": "8.0.13",
-    "wrangler": "4.92.0"
+    "wrangler": "4.92.0",
+    "yaml": "^2.9.0"
   },
   "type": "module"
 }
