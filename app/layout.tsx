@@ -18,8 +18,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "localhost:3000";
   const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
   const imageUrl = `${protocol}://${host}/og.png`;
-  const title = "Mailshade — Email Dark Mode Simulator";
-  const description = "Paste email HTML and compare its original, client-compatible light pass, and device-measured dark rendering. Gmail iOS is the first supported profile.";
+  const title = "Unbreakmail — Local-first email QA";
+  const description = "Paste or upload email HTML, compare measured previews, and inspect cited compatibility evidence locally.";
 
   return {
     title,

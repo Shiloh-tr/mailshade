@@ -14,17 +14,17 @@ async function render() {
   );
 }
 
-test("server-renders the Mailshade application shell", async () => {
+test("server-renders the Unbreakmail application shell", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /<title>Mailshade — Email Dark Mode Simulator<\/title>/i);
+  assert.match(html, /<title>Unbreakmail — Local-first email QA<\/title>/i);
   assert.match(html, /mailshade/i);
-  assert.match(html, /See what inboxes/i);
+  assert.match(html, /Find what breaks/i);
   assert.match(html, /Email client/i);
   assert.match(html, /Rendered previews/i);
-  assert.match(html, /Profile-based[\s\S]*Gmail[\s\S]*on[\s\S]*iOS[\s\S]*approximation, not a claim/i);
+  assert.match(html, /Profile-based[\s\S]*Gmail[\s\S]*on[\s\S]*iOS[\s\S]*approximation[\s\S]*not a claim/i);
   assert.match(html, /DEVICE-VALIDATED DRAFT/i);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Your site is taking shape/i);
 });
